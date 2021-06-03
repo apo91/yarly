@@ -1,4 +1,5 @@
 import { Random } from "random";
+import { ENTITY_TYPE } from "./entities";
 import { TILE_TYPE } from "./tiles";
 
 const GENERATOR_ACTION = {
@@ -8,18 +9,6 @@ const GENERATOR_ACTION = {
 
 const randomAction = (rng) =>
     rng.int(0, 1);
-
-
-// static inline
-// bool obsgen_ccw(float ax, float ay, float bx, float by, float cx, float cy) {
-//     return (cy - ay) * (bx - ax) > (by - ay) * (cx - ax);
-// }
-
-// static inline
-// bool obsgen_isect(const struct obsgen_segment* s1, const struct obsgen_segment* s2) {
-//     return obsgen_ccw(s1->x1, s1->y1, s2->x1, s2->y1, s2->x2, s2->y2) != obsgen_ccw(s1->x2, s1->y2, s2->x1, s2->y1, s2->x2, s2->y2)
-//         && obsgen_ccw(s1->x1, s1->y1, s1->x2, s1->y2, s2->x1, s2->y1) != obsgen_ccw(s1->x1, s1->y1, s1->x2, s1->y2, s2->x2, s2->y2);
-// }
 
 const ccw = (ax, ay, bx, by, cx, cy) =>
     (cy - ay) * (bx - ax) > (by - ay) * (cx - ax);
@@ -31,10 +20,25 @@ const isect = (s1, s2) =>
 /**
  * 
  * @param {Random} rng 
+ * @param {*} array 
+ */
+const shuffle = (rng, array) => {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = rng.int(0, i);
+        const temp = array[i];
+        array[i] = array[j];
+        array[j] = temp;
+    }
+    return array;
+};
+
+/**
+ * 
+ * @param {Random} rng 
  * @param {*} width 
  * @param {*} height 
  */
-export const generateDungeon = (rng, segmentsCount, width, height) => {
+export const generateLayoutTiles = (rng, segmentsCount, width, height) => {
     const segments = [
         [[rng.float(), rng.float()], [rng.float(), rng.float()]]
     ];
@@ -61,8 +65,8 @@ export const generateDungeon = (rng, segmentsCount, width, height) => {
             }
         }
     }
-    const dungeon = new Array(width * height);
-    dungeon.fill(TILE_TYPE.WALL);
+    const layoutTiles = new Array(width * height);
+    layoutTiles.fill(TILE_TYPE.WALL);
     const tw = 1 / width;
     const th = 1 / height;
     let i = 0;
@@ -73,51 +77,55 @@ export const generateDungeon = (rng, segmentsCount, width, height) => {
             const xw = x0 + tw;
             const yh = y0 + th;
             for (const segment of segments) {
-                if (dungeon[i] != TILE_TYPE.EMPTY) {
+                if (layoutTiles[i] != TILE_TYPE.EMPTY) {
                     const isCellIntersected =
                         isect(segment, [[x0, y0], [xw, y0]]) ||
                         isect(segment, [[xw, y0], [xw, yh]]) ||
                         isect(segment, [[xw, yh], [x0, yh]]) ||
                         isect(segment, [[x0, yh], [x0, y0]]);
                     if (isCellIntersected) {
-                        dungeon[i] = TILE_TYPE.EMPTY;
+                        layoutTiles[i] = TILE_TYPE.EMPTY;
                     }
                 }
             }
             i++;
         }
     }
-    return dungeon;
-    // // fill obstacles map
-    // bits_fill(obstacles_map, 1);
-    // float tw = 1. / (float)tile_cols;
-    // float th = 1. / (float)tile_rows;
-    // int i = 0;
-    // for (int r = 0; r < tile_rows; r++) {
-    //     for (int c = 0; c < tile_cols; c++) {
-    //         float x0 = tw * c;
-    //         float y0 = th * r;
-    //         float xw = x0 + tw;
-    //         float yh = y0 + th;
-    //         for (int j = 0; j < segments_count; j++) {
-    //             const struct obsgen_segment* segment = &segments[j];
-    //             if (bits_get(obstacles_map, i)) {
-    //                 bits_set(obstacles_map, i, !(
-    //                     obsgen_isect(segment, &(struct obsgen_segment) { x0, y0, xw, y0 }) ||
-    //                     obsgen_isect(segment, &(struct obsgen_segment) { xw, y0, xw, yh }) ||
-    //                     obsgen_isect(segment, &(struct obsgen_segment) { xw, yh, x0, yh }) ||
-    //                     obsgen_isect(segment, &(struct obsgen_segment) { x0, yh, x0, y0 })
-    //                 ));
-    //             }
-    //         }
-    //         i++;
-    //     }
-    // }
+    return layoutTiles;
+}
 
-    // const grid = new Array(width * height);
-    // for (let x = 0; x < width; x++) {
-    //     for (let y = 0; y < height; y++) {            
-    //         // grid[y * width + x] = 1;
-    //     }
-    // }
+/**
+ * 
+ * @param {Random} rng 
+ * @param {*} layoutTiles 
+ * @param {*} entitiesCount 
+ */
+export const generateEntities = (rng, layoutTiles, entitiesCount) => {
+    const emptyTileIndexes = [];
+    for (const tileIndex in layoutTiles) {
+        if (layoutTiles[tileIndex] === TILE_TYPE.EMPTY) {
+            emptyTileIndexes.push(tileIndex);
+        }
+    }
+    const entities = new Array(layoutTiles.length);
+    entities.fill(ENTITY_TYPE.NONE)
+    shuffle(rng, emptyTileIndexes);
+    for (const tileIndex of emptyTileIndexes.slice(0, entitiesCount)) {
+        let newEntityType = ENTITY_TYPE.NONE;
+        switch (rng.int(0, 2)) {
+            case 0:
+                newEntityType = ENTITY_TYPE.ENEMY;
+                break;
+            case 1:
+                newEntityType = ENTITY_TYPE.POTION;
+                break;
+            case 2:
+                newEntityType = ENTITY_TYPE.GOLD;
+                break;
+            default:
+                throw new Error("Unhandled switch case in generateEntities!");
+        }
+        entities[tileIndex] = newEntityType;
+    }
+    return entities;
 }

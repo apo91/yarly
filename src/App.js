@@ -1,8 +1,26 @@
-import { generateDungeon } from "./game/dungeon";
+import { generateEntities, generateLayoutTiles } from "./game/dungeon";
 import './App.css';
 import random from "random";
 import { useState } from 'react';
 import { TILE_TYPE } from "./game/tiles";
+import { ENTITY_TYPE } from "./game/entities";
+
+const entityTypeToSymbol = (entityType) => {
+  switch (entityType) {
+    case ENTITY_TYPE.NONE:
+      return ".";
+    case ENTITY_TYPE.PLAYER:
+      return "@";
+    case ENTITY_TYPE.ENEMY:
+      return "e";
+    case ENTITY_TYPE.POTION:
+      return "p";
+    case ENTITY_TYPE.GOLD:
+      return "g";
+    default:
+      throw new Error("Unknown entity type in entityTypeToSymbol!");
+  }
+}
 
 const TilesContainer = (props) =>
   <div style={{
@@ -14,7 +32,7 @@ const TilesContainer = (props) =>
     {props.children}
   </div>;
 
-const RenderedTile = ({ tileType, style, ...props }) =>
+const RenderedTile = ({ tileType, entityType, style, ...props }) =>
   <div
     style={{
       width: (100 / 32) + "%",
@@ -23,18 +41,30 @@ const RenderedTile = ({ tileType, style, ...props }) =>
     }}
     {...props}
   >
-    {tileType === TILE_TYPE.WALL ? "#" : "."}
+    {
+      tileType === TILE_TYPE.WALL
+        ? "#"
+        : entityTypeToSymbol(entityType)
+    }
   </div>;
 
 function App() {
   const rng = random.clone("1337");
-  const [dungeon] = useState(() => generateDungeon(rng, 16, 32, 24));
+  const [[dungeon, entities]] = useState(() => {
+    const dungeon = generateLayoutTiles(rng, 16, 32, 24);
+    const entities = generateEntities(rng, dungeon, 10);
+    return [dungeon, entities];
+  });
   return (
     <div className="App">
       <header className="App-header">
         <TilesContainer>
           {dungeon.map((tileType, i) =>
-            <RenderedTile key={i} tileType={tileType} />
+            <RenderedTile
+              key={i}
+              tileType={tileType}
+              entityType={entities[i]}
+            />
           )}
         </TilesContainer>
       </header>
