@@ -5,3 +5,10 @@ export const ENTITY_TYPE = {
     POTION: 3,
     GOLD: 4,
 };
+
+export class Entity {
+    constructor(type, data) {
+        this.type = type;
+        this.data = data;
+    }
+}
