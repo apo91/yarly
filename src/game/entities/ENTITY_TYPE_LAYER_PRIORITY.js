@@ -1,0 +1,4 @@
+export const ENTITY_TYPE_LAYER_PRIORITY = {
+    [ENTITY_TYPE.ITEM]: 0,
+    [ENTITY_TYPE.CREATURE]: 1,
+};
