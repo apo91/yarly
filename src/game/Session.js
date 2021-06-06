@@ -3,32 +3,46 @@ import EventEmitter from "events";
 import { Creature, CREATURE_TYPE } from "./Creature";
 import { PlayerInput } from "./PlayerInput";
 import { Dungeon } from "./Dungeon";
+import { ENTITY_TYPE } from "./entities";
+import { Entity } from "./entities/Entity";
+import { AsciiRenderer } from "./AsciiRenderer";
+
 
 export class Session {
     constructor() {
         this.rng = random.clone("1337");
-        this.player = new Creature(CREATURE_TYPE.PLAYER_ELF, 0, [0, 0]);
-        this.dungeon = new Dungeon(this.rng, 16, 32, 24, 10, this.player);
+        this.player = new Entity(ENTITY_TYPE.CREATURE,
+            new Creature(CREATURE_TYPE.PLAYER_ELF, 0, [0, 0]));
+        this.dungeon = new Dungeon(this.rng, 16, 16, 24, 10, this.player);
         this.isPlayerTurn = true;
         this.gameLoop = new EventEmitter();
         this.input = new PlayerInput();
+        this.renderer = new AsciiRenderer();
+        this.setupEventListeners();
     }
     setupEventListeners = () => {
         this.input.on("move", this.handlePlayerMove)
-        this.gameLoop.on("playerTurnEnd", this.handlePlayerTurnEnd);
-        this.gameLoop.on("computerTurnEnd", this.handleComputerTurnEnd);
+        this.gameLoop.on("playerTurnEnd", this.performComputerTurn);
+        // this.gameLoop.on("computerTurnEnd", this.handleComputerTurnEnd);
     }
     handlePlayerMove = (direction) => {
         if (!this.isPlayerTurn) return;
-        this.emit("playerTurnEnd");
-    }
-    handlePlayerTurnEnd = () => {
+        console.log("yeyeyeye");
+        const [status, _] = this.dungeon.tryMoveEntity(this.player, direction);
+        console.log(`handlePlayerMove, status = ${status}`);
         this.isPlayerTurn = false;
+        this.gameLoop.emit("playerTurnEnd");
+
     }
-    handleComputerTurnEnd = () => {
-        this.isPlayerTurn = true;
-    }
+    // handlePlayerTurnEnd = () => {
+    //     this.isPlayerTurn = false;
+    // }
+    // handleComputerTurnEnd = () => {
+    //     this.isPlayerTurn = true;
+    // }
     performComputerTurn = () => {
-        this.emit("computerTurnEnd");
+        console.log("performComputerTurn");
+        this.isPlayerTurn = true;
+        this.gameLoop.emit("computerTurnEnd");
     }
 }

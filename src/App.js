@@ -1,26 +1,12 @@
-import { generateEntities, generateLayoutTiles } from "./game/dungeon";
 import './App.css';
 import random from "random";
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { TILE_TYPE } from "./game/tiles";
 import { ENTITY_TYPE } from "./game/entities";
+import { Session } from './game/Session';
+import { atom, useAtom } from "jotai";
 
-const entityTypeToSymbol = (entityType) => {
-  switch (entityType) {
-    case ENTITY_TYPE.NONE:
-      return ".";
-    case ENTITY_TYPE.PLAYER:
-      return "@";
-    case ENTITY_TYPE.ENEMY:
-      return "e";
-    case ENTITY_TYPE.POTION:
-      return "p";
-    case ENTITY_TYPE.GOLD:
-      return "g";
-    default:
-      throw new Error("Unknown entity type in entityTypeToSymbol!");
-  }
-}
+const viewModelAtom = atom([]);
 
 const TilesContainer = (props) =>
   <div style={{
@@ -32,38 +18,37 @@ const TilesContainer = (props) =>
     {props.children}
   </div>;
 
-const RenderedTile = ({ tileType, entityType, style, ...props }) =>
+const RenderedTile = ({ symbol, ...props }) =>
   <div
     style={{
-      width: (100 / 32) + "%",
+      width: (100 / 16) + "%",
       boxSizing: "border-box",
-      ...style
     }}
     {...props}
   >
-    {
-      tileType === TILE_TYPE.WALL
-        ? "#"
-        : entityTypeToSymbol(entityType)
-    }
+    {symbol}
   </div>;
 
 function App() {
-  const rng = random.clone("1337");
-  const [[dungeon, entities]] = useState(() => {
-    const dungeon = generateLayoutTiles(rng, 16, 32, 24);
-    const entities = generateEntities(rng, dungeon, 10);
-    return [dungeon, entities];
-  });
+  const sessionRef = useRef(null); // useState(() => new Session());
+  const [viewModel, setViewModel] = useAtom(viewModelAtom); // atom(this.renderer.render(this.dungeon));
+  useEffect(() => {
+    const session = new Session();
+    sessionRef.current = session;
+    const invalidateViewModel = () => {
+      setViewModel(session.renderer.render(session.dungeon));
+    };
+    session.gameLoop.on("playerTurnEnd", invalidateViewModel);
+    invalidateViewModel();
+  }, []);
   return (
     <div className="App">
       <header className="App-header">
         <TilesContainer>
-          {dungeon.map((tileType, i) =>
+          {viewModel.map((symbol, i) =>
             <RenderedTile
               key={i}
-              tileType={tileType}
-              entityType={entities[i]}
+              symbol={symbol}
             />
           )}
         </TilesContainer>

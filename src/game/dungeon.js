@@ -48,7 +48,7 @@ export class Dungeon extends EventEmitter {
      * @param {number} height 
      * @param {number} layoutSegmentsCount 
      * @param {number} entitiesCount 
-     * @param {Creature} player
+     * @param {Entity} player
      */
     constructor(rng, width, height, layoutSegmentsCount, entitiesCount, player) {
         super();
@@ -73,10 +73,10 @@ export class Dungeon extends EventEmitter {
         this.generateEntities(rng, player, entitiesCount)
     }
     getTile(x, y) {
-        return this.layoutTilesBuffer[y * this.width + x];
+        return this.layoutTilesBuffer[this.getIndexFromCoords(x, y)];
     }
-    getEntityAt(x, y) {
-        return this.entityLayersBuffer[y * this.width + x];
+    getEntity(x, y) {
+        return this.entityLayersBuffer[this.getIndexFromCoords(x, y)];
     }
     tryMoveEntity(entity, direction) {
         for (const index in this.entityLayersBuffer) {
@@ -91,7 +91,7 @@ export class Dungeon extends EventEmitter {
                     newY < 0 || newY >= this.height;
                 if (isOutOfBounds)
                     return;
-                const newTileIndex = newY * this.width + newX;
+                const newTileIndex = this.getIndexFromCoords(newX, newY);
                 const targetEntityLayers = this.entityLayersBuffer[newTileIndex];
                 if (this.layoutTilesBuffer[newTileIndex] === TILE_TYPE.WALL) {
                     return [MOVE_ENTITY_RESULT.MOVE_INTO_OBSTACLE];
@@ -107,6 +107,9 @@ export class Dungeon extends EventEmitter {
     }
     getCoordsFromIndex(index) {
         return [index % this.width, Math.floor(index / this.width)];
+    }
+    getIndexFromCoords(x, y) {
+        return y * this.width + x;
     }
     removeEntity(entity) { }
     /**
@@ -175,30 +178,16 @@ export class Dungeon extends EventEmitter {
     /**
      * 
      * @param {Random} rng 
-     * @param {Creature} player
+     * @param {Entity} player
      * @param {number} entitiesCount 
      */
     generateEntities = (rng, player, entitiesCount) => {
         for (let i = 0; i < this.entityLayersBuffer.length; i++) {
             this.entityLayersBuffer[i] = new EntityLayers();
         }
-        this.entityLayersBuffer[this.entryTileIndex].addEntity(new Entity(ENTITY_TYPE.PLAYER, player));
+        this.entityLayersBuffer[this.entryTileIndex].addEntity(player);
         for (const tileIndex of this.emptyTileIndexes.slice(0, entitiesCount)) {
-            let newEntityType = ENTITY_TYPE.NONE;
-            switch (rng.int(0, 2)) {
-                case 0:
-                    newEntityType = ENTITY_TYPE.ENEMY;
-                    break;
-                case 1:
-                    newEntityType = ENTITY_TYPE.POTION;
-                    break;
-                case 2:
-                    newEntityType = ENTITY_TYPE.GOLD;
-                    break;
-                default:
-                    throw new Error("Unhandled switch case in generateEntities!");
-            }
-            this.entityLayersBuffer[tileIndex].addEntity(new Entity(newEntityType, null));
+            this.entityLayersBuffer[tileIndex].addEntity(new Entity(ENTITY_TYPE.ITEM, null));
         }
     }
 }

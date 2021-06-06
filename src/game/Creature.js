@@ -55,10 +55,10 @@ const ACTION_TYPE = {
 };
 
 const calcMaxHP = (type, level, effects) =>
-    INITIAL_HP[type] + LEVELUP_HP_BOOST[type] * level + effects.reduce(_ => 0);
+    INITIAL_HP[type] + LEVELUP_HP_BOOST[type] * level + effects.reduce(_ => 0, 0);
 
 const calcMaxMP = (type, level, effects) =>
-    INITIAL_MP[type] + LEVELUP_MP_BOOST[type] * level + effects.reduce(_ => 0);
+    INITIAL_MP[type] + LEVELUP_MP_BOOST[type] * level + effects.reduce(_ => 0, 0);
 
 export class Creature extends EventEmitter {
     constructor(type, level, position) {

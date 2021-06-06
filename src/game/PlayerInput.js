@@ -3,6 +3,7 @@ import { DIRECTION } from "./direction";
 
 export class PlayerInput extends EventEmitter {
     constructor() {
+        super();
         this.setupEventListeners();
     }
     setupEventListeners() {
