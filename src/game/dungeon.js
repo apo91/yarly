@@ -1,6 +1,9 @@
+import EventEmitter from "events";
 import { Random } from "random";
-import { Entity } from "./entities";
-import { ENTITY_TYPE } from "./entities";
+import { Creature } from "./Creature";
+import { DIRECTION_OFFSETS } from "./direction";
+import { ENTITY_TYPE, EntityLayers } from "./entities";
+import { Entity } from "./entities/Entity";
 import { TILE_TYPE } from "./tiles";
 
 /**
@@ -23,6 +26,12 @@ const LAYOUT_GENERATOR_ACTION = {
     ADD_LOOP: 1,
 };
 
+export const MOVE_ENTITY_RESULT = {
+    MOVE_SUCCESS: 0,
+    MOVE_INTO_OBSTACLE: 1,
+    MOVE_INTO_CREATURE: 2,
+};
+
 const ccw = (ax, ay, bx, by, cx, cy) =>
     (cy - ay) * (bx - ax) > (by - ay) * (cx - ax);
 
@@ -31,7 +40,7 @@ const isect = (s1, s2) =>
     ccw(s1[0][0], s1[0][1], s1[1][0], s1[1][1], s2[0][0], s2[0][1]) != ccw(s1[0][0], s1[0][1], s1[1][0], s1[1][1], s2[1][0], s2[1][1]);
 
 
-export class Dungeon {
+export class Dungeon extends EventEmitter {
     /**
      * 
      * @param {Random} rng 
@@ -42,31 +51,68 @@ export class Dungeon {
      * @param {Creature} player
      */
     constructor(rng, width, height, layoutSegmentsCount, entitiesCount, player) {
+        super();
         this.width = width;
         this.height = height;
         const bufferSize = width * height;
+        /**
+         * @type {number[]}
+         */
         this.layoutTilesBuffer = new Array(bufferSize);
-        this.entitiesBuffer = new Array(bufferSize);
+        /**
+         * @type {EntityLayers[]}
+         */
+        this.entityLayersBuffer = new Array(bufferSize);
+        /**
+         * @type {number[]}
+         */
         this.emptyTileIndexes = [];
         this.entryTileIndex = -1;
         this.exitTileIndex = -1;
         this.generateLayout(rng, layoutSegmentsCount);
-        this.generateEntities(rng, entitiesCount)
+        this.generateEntities(rng, player, entitiesCount)
     }
     getTile(x, y) {
         return this.layoutTilesBuffer[y * this.width + x];
     }
     getEntityAt(x, y) {
-        return this.entitiesBuffer[y * this.width + x];
+        return this.entityLayersBuffer[y * this.width + x];
+    }
+    tryMoveEntity(entity, direction) {
+        for (const index in this.entityLayersBuffer) {
+            const sourceEntityLayers = this.entityLayersBuffer[index];
+            if (sourceEntityLayers.hasEntity(entity)) {
+                const [x, y] = this.getCoordsFromIndex(index);
+                const [dx, dy] = DIRECTION_OFFSETS[direction];
+                const newX = x + dx;
+                const newY = y + dy;
+                const isOutOfBounds =
+                    newX < 0 || newX >= this.width ||
+                    newY < 0 || newY >= this.height;
+                if (isOutOfBounds)
+                    return;
+                const newTileIndex = newY * this.width + newX;
+                const targetEntityLayers = this.entityLayersBuffer[newTileIndex];
+                if (this.layoutTilesBuffer[newTileIndex] === TILE_TYPE.WALL) {
+                    return [MOVE_ENTITY_RESULT.MOVE_INTO_OBSTACLE];
+                } else if (entity.type === ENTITY_TYPE.CREATURE && targetEntityLayers.hasCreature) {
+                    return [MOVE_ENTITY_RESULT.MOVE_INTO_CREATURE, targetEntityLayers.getTopEntity()];
+                } else {
+                    sourceEntityLayers.removeEntity(entity);
+                    targetEntityLayers.addEntity(entity);
+                    return [MOVE_ENTITY_RESULT.MOVE_SUCCESS];
+                }
+            }
+        }
+    }
+    getCoordsFromIndex(index) {
+        return [index % this.width, Math.floor(index / this.width)];
     }
     removeEntity(entity) { }
     /**
      * 
      * @param {Random} rng
      * @param {number} segmentsCount 
-     * @param {number} width 
-     * @param {number} height
-     * @returns {Dungeon}
      */
     generateLayout = (rng, segmentsCount) => {
         const segments = [
@@ -133,8 +179,10 @@ export class Dungeon {
      * @param {number} entitiesCount 
      */
     generateEntities = (rng, player, entitiesCount) => {
-        this.entitiesBuffer.fill(ENTITY_TYPE.NONE)
-        this.entitiesBuffer[this.entryTileIndex] = new Entity(ENTITY_TYPE.PLAYER, player);
+        for (let i = 0; i < this.entityLayersBuffer.length; i++) {
+            this.entityLayersBuffer[i] = new EntityLayers();
+        }
+        this.entityLayersBuffer[this.entryTileIndex].addEntity(new Entity(ENTITY_TYPE.PLAYER, player));
         for (const tileIndex of this.emptyTileIndexes.slice(0, entitiesCount)) {
             let newEntityType = ENTITY_TYPE.NONE;
             switch (rng.int(0, 2)) {
@@ -150,7 +198,7 @@ export class Dungeon {
                 default:
                     throw new Error("Unhandled switch case in generateEntities!");
             }
-            this.entitiesBuffer[tileIndex] = new Entity(newEntityType, null);
+            this.entityLayersBuffer[tileIndex].addEntity(new Entity(newEntityType, null));
         }
     }
 }
