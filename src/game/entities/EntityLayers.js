@@ -65,10 +65,10 @@ export class EntityLayers {
      * @returns {boolean}
      */
     removeEntity(entity) {
-        for (const index in this.entities) {
-            const entityFromBuffer = this.entities[index];
+        for (let i = 0; i < this.entities.length; i++) {
+            const entityFromBuffer = this.entities[i];
             if (entityFromBuffer === entity) {
-                this.entities.splice(index, 1);
+                this.entities.splice(i, 1);
                 if (entity.type === ENTITY_TYPE.CREATURE) {
                     this.hasCreature = false;
                 }

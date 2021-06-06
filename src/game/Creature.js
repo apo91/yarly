@@ -62,6 +62,7 @@ const calcMaxMP = (type, level, effects) =>
 
 export class Creature extends EventEmitter {
     constructor(type, level, position) {
+        super();
         this.type = type;
         this.level = level;
         this.maxHP = calcMaxHP(type, level, []);
