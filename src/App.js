@@ -7,6 +7,16 @@ import { Session } from './game/Session';
 import { atom, useAtom } from "jotai";
 
 const viewModelAtom = atom([]);
+const turnCounterAtom = atom(0);
+
+const TurnCounter = (props) =>
+  <div style={{
+    position: "fixed",
+    top: "10px",
+    right: "20px",
+  }}>
+    {props.children}
+  </div>;
 
 const TilesContainer = (props) =>
   <div style={{
@@ -32,27 +42,30 @@ const RenderedTile = ({ symbol, ...props }) =>
 function App() {
   const sessionRef = useRef(null); // useState(() => new Session());
   const [viewModel, setViewModel] = useAtom(viewModelAtom); // atom(this.renderer.render(this.dungeon));
+  const [turnCounter, setTurnCounter] = useAtom(turnCounterAtom);
   useEffect(() => {
     const session = new Session();
     sessionRef.current = session;
     const invalidateViewModel = () => {
       setViewModel(session.renderer.render(session.dungeon));
+      setTurnCounter(session.turnCounter);
     };
     session.gameLoop.on("playerTurnEnd", invalidateViewModel);
     invalidateViewModel();
   }, []);
   return (
     <div className="App">
-      <header className="App-header">
-        <TilesContainer>
-          {viewModel.map((symbol, i) =>
-            <RenderedTile
-              key={i}
-              symbol={symbol}
-            />
-          )}
-        </TilesContainer>
-      </header>
+      <TurnCounter>
+        {turnCounter}
+      </TurnCounter>
+      <TilesContainer>
+        {viewModel.map((symbol, i) =>
+          <RenderedTile
+            key={i}
+            symbol={symbol}
+          />
+        )}
+      </TilesContainer>
     </div>
   );
 }

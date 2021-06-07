@@ -15,6 +15,7 @@ export class Session {
             new Creature(CREATURE_TYPE.PLAYER_ELF, 0, [0, 0]));
         this.dungeon = new Dungeon(this.rng, 16, 16, 24, 10, this.player);
         this.isPlayerTurn = true;
+        this.turnCounter = 0;
         this.gameLoop = new EventEmitter();
         this.input = new PlayerInput();
         this.renderer = new AsciiRenderer();
@@ -44,7 +45,7 @@ export class Session {
 
     }
     performComputerTurn = () => {
-        console.log("performComputerTurn");
+        this.turnCounter++;
         this.isPlayerTurn = true;
         this.gameLoop.emit("computerTurnEnd");
     }
