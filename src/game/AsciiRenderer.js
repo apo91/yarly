@@ -1,5 +1,5 @@
 import { Creature, CREATURE_TYPE } from "./Creature";
-import { Dungeon } from "./Dungeon"
+import { Dungeon } from "./dungeon";
 import { ENTITY_TYPE } from "./entities";
 import { Entity } from "./entities/Entity";
 import { TILE_TYPE } from "./tiles";
