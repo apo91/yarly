@@ -1,43 +1,12 @@
 import EventEmitter from "events";
 import { Random } from "random";
-import { DIRECTION_OFFSETS } from "./direction";
-import { ENTITY_TYPE, EntityLayers } from "./entities";
-import { Entity } from "./entities/Entity";
-import { TILE_TYPE } from "./tiles";
-
-/**
- * 
- * @param {Random} rng 
- * @param {*} array 
- */
-const shuffle = (rng, array) => {
-    for (let i = array.length - 1; i > 0; i--) {
-        const j = rng.int(0, i);
-        const temp = array[i];
-        array[i] = array[j];
-        array[j] = temp;
-    }
-    return array;
-};
-
-const LAYOUT_GENERATOR_ACTION = {
-    ADD_SEGMENT: 0,
-    ADD_LOOP: 1,
-};
-
-export const MOVE_ENTITY_RESULT = {
-    MOVE_SUCCESS: 0,
-    MOVE_INTO_OBSTACLE: 1,
-    MOVE_INTO_CREATURE: 2,
-};
-
-const ccw = (ax, ay, bx, by, cx, cy) =>
-    (cy - ay) * (bx - ax) > (by - ay) * (cx - ax);
-
-const isect = (s1, s2) =>
-    ccw(s1[0][0], s1[0][1], s2[0][0], s2[0][1], s2[1][0], s2[1][1]) != ccw(s1[1][0], s1[1][1], s2[0][0], s2[0][1], s2[1][0], s2[1][1]) &&
-    ccw(s1[0][0], s1[0][1], s1[1][0], s1[1][1], s2[0][0], s2[0][1]) != ccw(s1[0][0], s1[0][1], s1[1][0], s1[1][1], s2[1][0], s2[1][1]);
-
+import { DIRECTION_OFFSETS } from "../direction";
+import { ENTITY_TYPE, EntityLayers } from "../entities";
+import { Entity } from "../entities/Entity";
+import { TILE_TYPE } from "../tiles";
+import { isect, shuffle } from "../utils";
+import { LAYOUT_GENERATOR_ACTION } from "./LAYOUT_GENERATOR_ACTION";
+import { MOVE_ENTITY_RESULT } from "./MOVE_ENTITY_RESULT";
 
 export class Dungeon extends EventEmitter {
     /**

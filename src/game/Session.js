@@ -2,7 +2,7 @@ import random from "random";
 import EventEmitter from "events";
 import { Creature, CREATURE_TYPE } from "./Creature";
 import { PlayerInput } from "./PlayerInput";
-import { Dungeon, MOVE_ENTITY_RESULT } from "./Dungeon";
+import { Dungeon, MOVE_ENTITY_RESULT } from "./dungeon";
 import { ENTITY_TYPE } from "./entities";
 import { Entity } from "./entities/Entity";
 import { AsciiRenderer } from "./AsciiRenderer";
