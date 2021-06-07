@@ -2,7 +2,7 @@ import random from "random";
 import EventEmitter from "events";
 import { Creature, CREATURE_TYPE } from "./Creature";
 import { PlayerInput } from "./PlayerInput";
-import { Dungeon } from "./Dungeon";
+import { Dungeon, MOVE_ENTITY_RESULT } from "./Dungeon";
 import { ENTITY_TYPE } from "./entities";
 import { Entity } from "./entities/Entity";
 import { AsciiRenderer } from "./AsciiRenderer";
@@ -23,23 +23,26 @@ export class Session {
     setupEventListeners = () => {
         this.input.on("move", this.handlePlayerMove)
         this.gameLoop.on("playerTurnEnd", this.performComputerTurn);
-        // this.gameLoop.on("computerTurnEnd", this.handleComputerTurnEnd);
     }
     handlePlayerMove = (direction) => {
         if (!this.isPlayerTurn) return;
-        console.log("yeyeyeye");
         const [status, _] = this.dungeon.tryMoveEntity(this.player, direction);
-        console.log(`handlePlayerMove, status = ${status}`);
+        switch (status) {
+            case MOVE_ENTITY_RESULT.MOVE_SUCCESS: {
+                break;
+            }
+            case MOVE_ENTITY_RESULT.MOVE_INTO_CREATURE: {
+                // attack
+                break;
+            }
+            case MOVE_ENTITY_RESULT.MOVE_INTO_OBSTACLE: {
+                return;
+            }
+        }
         this.isPlayerTurn = false;
         this.gameLoop.emit("playerTurnEnd");
 
     }
-    // handlePlayerTurnEnd = () => {
-    //     this.isPlayerTurn = false;
-    // }
-    // handleComputerTurnEnd = () => {
-    //     this.isPlayerTurn = true;
-    // }
     performComputerTurn = () => {
         console.log("performComputerTurn");
         this.isPlayerTurn = true;

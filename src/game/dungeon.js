@@ -1,6 +1,5 @@
 import EventEmitter from "events";
 import { Random } from "random";
-import { Creature } from "./Creature";
 import { DIRECTION_OFFSETS } from "./direction";
 import { ENTITY_TYPE, EntityLayers } from "./entities";
 import { Entity } from "./entities/Entity";
@@ -90,7 +89,7 @@ export class Dungeon extends EventEmitter {
                     newX < 0 || newX >= this.width ||
                     newY < 0 || newY >= this.height;
                 if (isOutOfBounds)
-                    return;
+                    return [MOVE_ENTITY_RESULT.MOVE_INTO_OBSTACLE];
                 const newTileIndex = this.getIndexFromCoords(newX, newY);
                 const targetEntityLayers = this.entityLayersBuffer[newTileIndex];
                 if (this.layoutTilesBuffer[newTileIndex] === TILE_TYPE.WALL) {
@@ -104,6 +103,7 @@ export class Dungeon extends EventEmitter {
                 }
             }
         }
+        throw new Error("Dungeon.tryMoveEntity: entity not found!");
     }
     getCoordsFromIndex(index) {
         return [index % this.width, Math.floor(index / this.width)];
