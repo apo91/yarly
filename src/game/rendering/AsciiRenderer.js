@@ -35,6 +35,9 @@ const entityToSymbol = (entity) => {
 const layoutTileToSymbol = (tileType) =>
     tileType === TILE_TYPE.WALL ? "#" : ".";
 
+const layoutTileOpacity = (tileType) =>
+    tileType === TILE_TYPE.WALL ? 1 : 0.5;
+
 export class AsciiRenderer {
     /**
      * @param {ViewportConfig} viewportConfig
@@ -63,21 +66,27 @@ export class AsciiRenderer {
                         <RenderedTile
                             key={dy * this.viewportWidth + dx}
                             tilesPerRow={this.viewportWidth}
-
+                            opacity={1}
                         >
                             #
                         </RenderedTile>
                     );
                 } else {
                     const tileIndex = dungeon.getIndexFromCoords(x, y);
+                    const layoutTile = dungeon.layoutTilesBuffer[tileIndex];
                     const entityLayers = dungeon.entityLayersBuffer[tileIndex];
                     tiles.push(
                         <RenderedTile
                             key={dy * this.viewportWidth + dx}
                             tilesPerRow={this.viewportWidth}
+                            opacity={
+                                entityLayers.isEmpty()
+                                    ? layoutTileOpacity(layoutTile)
+                                    : 1
+                            }
                         >
                             {entityLayers.isEmpty()
-                                ? layoutTileToSymbol(dungeon.layoutTilesBuffer[tileIndex])
+                                ? layoutTileToSymbol(layoutTile)
                                 : entityToSymbol(entityLayers.getTopEntity())}
                         </RenderedTile>
                     );
