@@ -61,7 +61,7 @@ const calcMaxMP = (type, level, effects) =>
     INITIAL_MP[type] + LEVELUP_MP_BOOST[type] * level + effects.reduce(_ => 0, 0);
 
 export class Creature extends EventEmitter {
-    constructor(type, level, position) {
+    constructor(type, level) {
         super();
         this.type = type;
         this.level = level;
@@ -69,7 +69,6 @@ export class Creature extends EventEmitter {
         this.maxMP = calcMaxMP(type, level, []);
         this.currentHP = this.maxHP;
         this.currentMP = this.maxMP;
-        this.position = position;
         this.direction = DIRECTION.NORTH;
     }
     applyEffect() { }

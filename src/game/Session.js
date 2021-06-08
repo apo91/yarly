@@ -12,7 +12,7 @@ export class Session {
     constructor() {
         this.rng = random.clone("1337");
         this.player = new Entity(ENTITY_TYPE.CREATURE,
-            new Creature(CREATURE_TYPE.PLAYER_ELF, 0, [0, 0]));
+            new Creature(CREATURE_TYPE.PLAYER_ELF, 0));
         this.dungeon = new Dungeon(this.rng, 16, 16, 24, 10, this.player);
         this.isPlayerTurn = true;
         this.turnCounter = 0;
