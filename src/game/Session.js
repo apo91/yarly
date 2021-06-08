@@ -2,23 +2,32 @@ import random from "random";
 import EventEmitter from "events";
 import { Creature, CREATURE_TYPE } from "./Creature";
 import { PlayerInput } from "./PlayerInput";
-import { Dungeon, MOVE_ENTITY_RESULT } from "./dungeon";
+import { Dungeon, DungeonConfig, MOVE_ENTITY_RESULT } from "./dungeon";
 import { ENTITY_TYPE } from "./entities";
 import { Entity } from "./entities/Entity";
-import { AsciiRenderer } from "./AsciiRenderer";
+import { AsciiRenderer } from "./rendering/AsciiRenderer";
 
+/**
+ * @typedef {Object} SessionConfig
+ * @property {DungeonConfig} dungeonConfig
+ * @property {ViewportConfig} viewportConfig
+ */
 
 export class Session {
-    constructor() {
+    /**
+     *
+     * @param {SessionConfig} config
+     */
+    constructor(config) {
         this.rng = random.clone("1337");
         this.player = new Entity(ENTITY_TYPE.CREATURE,
             new Creature(CREATURE_TYPE.PLAYER_ELF, 0));
-        this.dungeon = new Dungeon(this.rng, 16, 16, 24, 10, this.player);
+        this.dungeon = new Dungeon(this.rng, this.player, config.dungeonConfig);
         this.isPlayerTurn = true;
         this.turnCounter = 0;
         this.gameLoop = new EventEmitter();
         this.input = new PlayerInput();
-        this.renderer = new AsciiRenderer();
+        this.renderer = new AsciiRenderer(config.viewportConfig);
         this.setupEventListeners();
     }
     setupEventListeners = () => {

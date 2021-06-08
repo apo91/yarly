@@ -8,21 +8,25 @@ import { isect, shuffle } from "../utils";
 import { LAYOUT_GENERATOR_ACTION } from "./LAYOUT_GENERATOR_ACTION";
 import { MOVE_ENTITY_RESULT } from "./MOVE_ENTITY_RESULT";
 
+/**
+ * @typedef {Object} DungeonConfig
+ * @property {number} width
+ * @property {number} height
+ * @property {number} layoutSegmentsCount
+ * @property {number} entitiesCount
+ */
+
 export class Dungeon extends EventEmitter {
     /**
-     *
      * @param {Random} rng
-     * @param {number} width
-     * @param {number} height
-     * @param {number} layoutSegmentsCount
-     * @param {number} entitiesCount
      * @param {Entity} player
+     * @param {DungeonConfig} config
      */
-    constructor(rng, width, height, layoutSegmentsCount, entitiesCount, player) {
+    constructor(rng, player, config) {
         super();
-        this.width = width;
-        this.height = height;
-        const bufferSize = width * height;
+        this.width = config.width;
+        this.height = config.height;
+        const bufferSize = config.width * config.height;
         /**
          * @type {number[]}
          */
@@ -41,15 +45,37 @@ export class Dungeon extends EventEmitter {
         this.tileIndexByEntityRef = new Map();
         this.entryTileIndex = -1;
         this.exitTileIndex = -1;
-        this.generateLayout(rng, layoutSegmentsCount);
-        this.generateEntities(rng, player, entitiesCount)
+        this.player = player;
+        this.generateLayout(rng, config.layoutSegmentsCount);
+        this.generateEntities(rng, player, config.entitiesCount)
     }
+    /**
+     * @param {number} x
+     * @param {number} y
+     */
     getTile(x, y) {
         return this.layoutTilesBuffer[this.getIndexFromCoords(x, y)];
     }
+    /**
+     * @param {number} x
+     * @param {number} y
+     */
     getEntity(x, y) {
         return this.entityLayersBuffer[this.getIndexFromCoords(x, y)];
     }
+    /**
+     * @param {Entity} entity
+     * @returns {[number, number]}
+     */
+    getEntityCoords(entity) {
+        return this.getCoordsFromIndex(this.tileIndexByEntityRef.get(entity));
+    }
+    /**
+     *
+     * @param {Entity} entity
+     * @param {number} direction
+     * @returns {[number, ...any]}
+     */
     tryMoveEntity(entity, direction) {
         const sourceTileIndex = this.tileIndexByEntityRef.get(entity);
         const sourceEntityLayers = this.entityLayersBuffer[sourceTileIndex];
@@ -75,9 +101,18 @@ export class Dungeon extends EventEmitter {
             return [MOVE_ENTITY_RESULT.MOVE_SUCCESS];
         }
     }
+    /**
+     * @param {number} index
+     * @returns {[number, number]}
+     */
     getCoordsFromIndex(index) {
         return [index % this.width, Math.floor(index / this.width)];
     }
+    /**
+     * @param {number} x
+     * @param {number} y
+     * @returns {number}
+     */
     getIndexFromCoords(x, y) {
         return y * this.width + x;
     }

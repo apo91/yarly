@@ -6,7 +6,7 @@ import { ENTITY_TYPE } from "./game/entities";
 import { Session } from './game/Session';
 import { atom, useAtom } from "jotai";
 
-const viewModelAtom = atom([]);
+const viewportHtmlAtom = atom([]);
 const turnCounterAtom = atom(0);
 
 const TurnCounter = (props) =>
@@ -28,30 +28,30 @@ const TilesContainer = (props) =>
     {props.children}
   </div>;
 
-const RenderedTile = ({ symbol, ...props }) =>
-  <div
-    style={{
-      width: (100 / 16) + "%",
-      boxSizing: "border-box",
-    }}
-    {...props}
-  >
-    {symbol}
-  </div>;
-
 function App() {
-  const sessionRef = useRef(null); // useState(() => new Session());
-  const [viewModel, setViewModel] = useAtom(viewModelAtom); // atom(this.renderer.render(this.dungeon));
+  const sessionRef = useRef(null);
+  const [viewportHtml, setViewportHtml] = useAtom(viewportHtmlAtom);
   const [turnCounter, setTurnCounter] = useAtom(turnCounterAtom);
   useEffect(() => {
-    const session = new Session();
+    const session = new Session({
+      dungeonConfig: {
+        width: 16,
+        height: 16,
+        layoutSegmentsCount: 24,
+        entitiesCount: 10,
+      },
+      viewportConfig: {
+        width: 16,
+        height: 10,
+      },
+    });
     sessionRef.current = session;
-    const invalidateViewModel = () => {
-      setViewModel(session.renderer.render(session.dungeon));
+    const invalidateViewport = () => {
+      setViewportHtml(session.renderer.render(session.dungeon));
       setTurnCounter(session.turnCounter);
     };
-    session.gameLoop.on("playerTurnEnd", invalidateViewModel);
-    invalidateViewModel();
+    session.gameLoop.on("playerTurnEnd", invalidateViewport);
+    invalidateViewport();
   }, []);
   return (
     <div className="App">
@@ -59,12 +59,7 @@ function App() {
         {turnCounter}
       </TurnCounter>
       <TilesContainer>
-        {viewModel.map((symbol, i) =>
-          <RenderedTile
-            key={i}
-            symbol={symbol}
-          />
-        )}
+        {viewportHtml}
       </TilesContainer>
     </div>
   );
@@ -78,8 +73,8 @@ export default App;
 //   const [segments] = useState(() => generateDungeon(rng, 10, 16, 16));
 //   const canvas = useRef();
 //   /**
-//    * 
-//    * @param {CanvasRenderingContext2D} ctx 
+//    *
+//    * @param {CanvasRenderingContext2D} ctx
 //    */
 //   const draw = (ctx) => {
 //     const w = ctx.canvas.width;
