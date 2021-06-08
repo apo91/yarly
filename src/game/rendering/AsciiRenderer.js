@@ -1,7 +1,7 @@
 import React from "react";
 import { Creature, CREATURE_TYPE } from "../Creature";
 import { Dungeon } from "../dungeon";
-import { ENTITY_TYPE } from "../entities";
+import { EntityLayers, ENTITY_TYPE } from "../entities";
 import { Entity } from "../entities/Entity";
 import { TILE_TYPE } from "../tiles";
 import { RenderedTile, TilesContainer } from "./AsciiRenderer.styled";
@@ -9,7 +9,7 @@ import { RenderedTile, TilesContainer } from "./AsciiRenderer.styled";
 /**
  * @param {Entity} entity
  */
-const entityToSymbol = (entity) => {
+const entitySymbol = (entity) => {
     console.log("entityToSymbol... ", entity);
     switch (entity.type) {
         case ENTITY_TYPE.CREATURE: {
@@ -32,11 +32,52 @@ const entityToSymbol = (entity) => {
     }
 }
 
-const layoutTileToSymbol = (tileType) =>
-    tileType === TILE_TYPE.WALL ? "#" : ".";
+const tileTypeSymbol = (tileType) => {
+    switch (tileType) {
+        case TILE_TYPE.WALL:
+            return "#";
+        case TILE_TYPE.ENTRY:
+            return "<";
+        case TILE_TYPE.EXIT:
+            return ">";
+        case TILE_TYPE.EMPTY:
+            return ".";
+        default:
+            throw new Error(`Unknown tile type ${tileType}!`);
+    }
+};
 
-const layoutTileOpacity = (tileType) =>
-    tileType === TILE_TYPE.WALL ? 1 : 0.5;
+const tileSymbol = (layoutTile, entityLayers) => {
+    return entityLayers.isEmpty()
+        ? tileTypeSymbol(layoutTile)
+        : entitySymbol(entityLayers.getTopEntity());
+}
+
+/**
+ *
+ * @param {number} layoutTile
+ * @param {EntityLayers} entityLayers
+ */
+const tileForegroundColor = (layoutTile, entityLayers) => {
+    if (entityLayers.isEmpty()) {
+        switch (layoutTile) {
+            case TILE_TYPE.EMPTY:
+                return "rgba(255, 255, 255, 0.75)";
+            default:
+                return "rgba(255, 255, 255, 1)";
+        }
+    } else {
+        const topEntity = entityLayers.getTopEntity();
+        switch (topEntity.type) {
+            case ENTITY_TYPE.CREATURE:
+                return "rgba(255, 128, 255, 0.75)";
+            case ENTITY_TYPE.ITEM:
+                return "rgba(128, 128, 255, 0.75)";
+            default:
+                throw new Error(`Unknown entity type ${topEntity.type}!`);
+        }
+    }
+};
 
 export class AsciiRenderer {
     /**
@@ -66,7 +107,7 @@ export class AsciiRenderer {
                         <RenderedTile
                             key={dy * this.viewportWidth + dx}
                             tilesPerRow={this.viewportWidth}
-                            opacity={1}
+                            color={"white"}
                         >
                             #
                         </RenderedTile>
@@ -79,15 +120,9 @@ export class AsciiRenderer {
                         <RenderedTile
                             key={dy * this.viewportWidth + dx}
                             tilesPerRow={this.viewportWidth}
-                            opacity={
-                                entityLayers.isEmpty()
-                                    ? layoutTileOpacity(layoutTile)
-                                    : 1
-                            }
+                            color={tileForegroundColor(layoutTile, entityLayers)}
                         >
-                            {entityLayers.isEmpty()
-                                ? layoutTileToSymbol(layoutTile)
-                                : entityToSymbol(entityLayers.getTopEntity())}
+                            {tileSymbol(layoutTile, entityLayers)}
                         </RenderedTile>
                     );
                 }

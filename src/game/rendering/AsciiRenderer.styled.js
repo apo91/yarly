@@ -8,10 +8,10 @@ export const TilesContainer = styled.div`
 `;
 
 /**
- * @type {StyledComponent<"div", any, { tilesPerRow: number, opacity: number }, never>}
+ * @type {StyledComponent<"div", any, { tilesPerRow: number, color: string }, never>}
  */
 export const RenderedTile = styled.div`
     width: ${props => `${100 / props.tilesPerRow}%`};
-    opacity: ${props => props.opacity};
+    color: ${props => props.color};
     box-sizing: border-box;
 `;
