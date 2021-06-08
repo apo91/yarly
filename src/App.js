@@ -6,7 +6,7 @@ import { ENTITY_TYPE } from "./game/entities";
 import { Session } from './game/Session';
 import { atom, useAtom } from "jotai";
 
-const viewportHtmlAtom = atom([]);
+const viewportHtmlAtom = atom(<div>1</div>);
 const turnCounterAtom = atom(0);
 
 const TurnCounter = (props) =>
@@ -15,16 +15,6 @@ const TurnCounter = (props) =>
     top: "10px",
     right: "20px",
   }}>
-    {props.children}
-  </div>;
-
-const TilesContainer = (props) =>
-  <div style={{
-    width: "1024px",
-    display: "flex",
-    flexWrap: "wrap"
-  }}
-  >
     {props.children}
   </div>;
 
@@ -42,7 +32,7 @@ function App() {
       },
       viewportConfig: {
         width: 16,
-        height: 10,
+        height: 16,
       },
     });
     sessionRef.current = session;
@@ -58,9 +48,9 @@ function App() {
       <TurnCounter>
         {turnCounter}
       </TurnCounter>
-      <TilesContainer>
+      <div style={{ width: "640px" }}>
         {viewportHtml}
-      </TilesContainer>
+      </div>
     </div>
   );
 }

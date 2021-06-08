@@ -1,20 +1,10 @@
+import React from "react";
 import { Creature, CREATURE_TYPE } from "../Creature";
 import { Dungeon } from "../dungeon";
 import { ENTITY_TYPE } from "../entities";
 import { Entity } from "../entities/Entity";
 import { TILE_TYPE } from "../tiles";
-// import react from 'react';
-
-const RenderedTile = ({ tilesPerRow, symbol, ...props }) =>
-    <div
-        style={{
-            width: (100 / tilesPerRow) + "%",
-            boxSizing: "border-box",
-        }}
-        {...props}
-    >
-        {symbol}
-    </div>;
+import { RenderedTile, TilesContainer } from "./AsciiRenderer.styled";
 
 /**
  * @param {Entity} entity
@@ -57,34 +47,47 @@ export class AsciiRenderer {
      * @param {Dungeon} dungeon
      */
     render(dungeon) {
-        // todo render viewport based on dungeon.player & vwwidth & vwheight
         const [playerX, playerY] = dungeon.getEntityCoords(dungeon.player);
-        const x0 = Math.max(0, playerX - Math.floor(this.viewportWidth / 2));
-        const y0 = Math.max(0, playerY - Math.floor(this.viewportHeight / 2));
-        const result = [];
+        const x0 = playerX - Math.floor(this.viewportWidth / 2);
+        const y0 = playerY - Math.floor(this.viewportHeight / 2);
+        const tiles = [];
         for (let dy = 0; dy < this.viewportHeight; dy++) {
             for (let dx = 0; dx < this.viewportWidth; dx++) {
-                const tileIndex = dungeon.getIndexFromCoords(x0 + dx, y0 + dy);
-                const entityLayers = dungeon.entityLayersBuffer[tileIndex];
-                result.push(
-                    <RenderedTile
-                        key={dy * this.viewportWidth + dx}
-                        tilesPerRow={this.viewportWidth}
-                        symbol={
-                            entityLayers.isEmpty()
+                const x = x0 + dx;
+                const y = y0 + dy;
+                const outOfBounds =
+                    x < 0 || x >= dungeon.width ||
+                    y < 0 || y >= dungeon.height;
+                if (outOfBounds) {
+                    tiles.push(
+                        <RenderedTile
+                            key={dy * this.viewportWidth + dx}
+                            tilesPerRow={this.viewportWidth}
+
+                        >
+                            #
+                        </RenderedTile>
+                    );
+                } else {
+                    const tileIndex = dungeon.getIndexFromCoords(x, y);
+                    const entityLayers = dungeon.entityLayersBuffer[tileIndex];
+                    tiles.push(
+                        <RenderedTile
+                            key={dy * this.viewportWidth + dx}
+                            tilesPerRow={this.viewportWidth}
+                        >
+                            {entityLayers.isEmpty()
                                 ? layoutTileToSymbol(dungeon.layoutTilesBuffer[tileIndex])
-                                : entityToSymbol(entityLayers.getTopEntity())
-                        }
-                    />
-                );
+                                : entityToSymbol(entityLayers.getTopEntity())}
+                        </RenderedTile>
+                    );
+                }
             }
         }
-        return result;
-        // {viewportHtml.map((symbol, i) =>
-        //     <RenderedTile
-        //       key={i}
-        //       symbol={symbol}
-        //     />
-        //   )}
+        return (
+            <TilesContainer>
+                {tiles}
+            </TilesContainer>
+        );
     }
 }
