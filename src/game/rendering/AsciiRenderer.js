@@ -5,12 +5,12 @@ import { EntityLayers, ENTITY_TYPE } from "../entities";
 import { Entity } from "../entities/Entity";
 import { TILE_TYPE } from "../tiles";
 import { RenderedTile, TilesContainer } from "./AsciiRenderer.styled";
+import "./ViewportConfig";
 
 /**
  * @param {Entity} entity
  */
 const entitySymbol = (entity) => {
-    console.log("entityToSymbol... ", entity);
     switch (entity.type) {
         case ENTITY_TYPE.CREATURE: {
             /**
