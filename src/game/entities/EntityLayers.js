@@ -20,14 +20,26 @@ export class EntityLayers {
         return this.entities[this.entities.length - 1];
     }
     /**
-     * @param {Entity} entity 
+     * @param {number} type
+     * @returns {Entity}
+     */
+    getTopEntityOfType(type) {
+        for (let i = 0; i < this.entities.length; i++) {
+            const entity = this.entities[this.entities.length - 1 - i];
+            if (entity.type === type) {
+                return entity;
+            }
+        }
+    }
+    /**
+     * @param {Entity} entity
      * @returns {boolean}
      */
     hasEntity(entity) {
         return this.entities.includes(entity);
     }
     /**
-     * @param {Entity} entity 
+     * @param {Entity} entity
      */
     addEntity(entity) {
         if (entity.type === ENTITY_TYPE.CREATURE) {
@@ -61,7 +73,7 @@ export class EntityLayers {
     //     return [this.entityTypeBuffer.pop(), this.entityDataRefBuffer.pop()];
     // }
     /**
-     * @param {Entity} entity 
+     * @param {Entity} entity
      * @returns {boolean}
      */
     removeEntity(entity) {

@@ -1,8 +1,10 @@
 import EventEmitter from "events";
 import { Random } from "random";
+import { Consumable } from "../Consumable";
 import { DIRECTION_OFFSETS } from "../direction";
 import { ENTITY_TYPE, EntityLayers } from "../entities";
 import { Entity } from "../entities/Entity";
+import { Item, ITEM_TYPE } from "../Item";
 import { TILE_TYPE } from "../tiles";
 import { isect, shuffle } from "../utils";
 import { LAYOUT_GENERATOR_ACTION } from "./LAYOUT_GENERATOR_ACTION";
@@ -59,8 +61,9 @@ export class Dungeon extends EventEmitter {
     /**
      * @param {number} x
      * @param {number} y
+     * @returns {EntityLayers}
      */
-    getEntity(x, y) {
+    getEntityLayers(x, y) {
         return this.entityLayersBuffer[this.getIndexFromCoords(x, y)];
     }
     /**
@@ -193,7 +196,9 @@ export class Dungeon extends EventEmitter {
         this.entityLayersBuffer[this.entryTileIndex].addEntity(player);
         this.tileIndexByEntityRef.set(player, this.entryTileIndex);
         for (const tileIndex of this.emptyTileIndexes.slice(0, entitiesCount)) {
-            const entity = new Entity(ENTITY_TYPE.ITEM, null);
+            const entity = new Entity(ENTITY_TYPE.ITEM,
+                new Item(ITEM_TYPE.CONSUMABLE, new Consumable(rng))
+            );
             this.tileIndexByEntityRef.set(entity, tileIndex);
             this.entityLayersBuffer[tileIndex].addEntity(entity);
         }

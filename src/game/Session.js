@@ -6,6 +6,7 @@ import { Dungeon, DungeonConfig, MOVE_ENTITY_RESULT } from "./dungeon";
 import { ENTITY_TYPE } from "./entities";
 import { Entity } from "./entities/Entity";
 import { AsciiRenderer } from "./rendering/AsciiRenderer";
+import { ITEM_TYPE } from "./Item";
 
 /**
  * @typedef {Object} SessionConfig
@@ -25,6 +26,7 @@ export class Session {
         this.dungeon = new Dungeon(this.rng, this.player, config.dungeonConfig);
         this.isPlayerTurn = true;
         this.turnCounter = 0;
+        this.pickupItem = "";
         this.gameLoop = new EventEmitter();
         this.input = new PlayerInput();
         this.renderer = new AsciiRenderer(config.viewportConfig);
@@ -39,6 +41,18 @@ export class Session {
         const [status, _] = this.dungeon.tryMoveEntity(this.player, direction);
         switch (status) {
             case MOVE_ENTITY_RESULT.MOVE_SUCCESS: {
+                const [x, y] = this.dungeon.getEntityCoords(this.player);
+                const entityLayers = this.dungeon.getEntityLayers(x, y);
+                const topItemEntity = entityLayers.getTopEntityOfType(ENTITY_TYPE.ITEM);
+                // console.log("topEntity", topEntity);
+                if (
+                    topItemEntity &&
+                    topItemEntity.data.type == ITEM_TYPE.CONSUMABLE
+                ) {
+                    this.pickupItem = topItemEntity.data.data.name;
+                } else {
+                    this.pickupItem = "";
+                }
                 break;
             }
             case MOVE_ENTITY_RESULT.MOVE_INTO_CREATURE: {

@@ -5,6 +5,7 @@ import { atom, useAtom } from "jotai";
 
 const viewportHtmlAtom = atom(<div>1</div>);
 const turnCounterAtom = atom(0);
+const pickupItemAtom = atom("");
 
 const TurnCounter = (props) =>
   <div style={{
@@ -15,10 +16,20 @@ const TurnCounter = (props) =>
     {props.children}
   </div>;
 
+const PickupItem = (props) =>
+  <div style={{
+    position: "fixed",
+    top: "40px",
+    right: "20px",
+  }}>
+    {props.children}
+  </div>;
+
 function App() {
   const sessionRef = useRef(null);
   const [viewportHtml, setViewportHtml] = useAtom(viewportHtmlAtom);
   const [turnCounter, setTurnCounter] = useAtom(turnCounterAtom);
+  const [pickupItem, setPickupItem] = useAtom(pickupItemAtom);
   useEffect(() => {
     const session = new Session({
       dungeonConfig: {
@@ -36,6 +47,7 @@ function App() {
     const invalidateViewport = () => {
       setViewportHtml(session.renderer.render(session.dungeon));
       setTurnCounter(session.turnCounter);
+      setPickupItem(session.pickupItem);
     };
     session.gameLoop.on("playerTurnEnd", invalidateViewport);
     invalidateViewport();
@@ -45,6 +57,9 @@ function App() {
       <TurnCounter>
         {turnCounter}
       </TurnCounter>
+      <PickupItem>
+        {pickupItem}
+      </PickupItem>
       <div style={{ width: "1024px" }}>
         {viewportHtml}
       </div>
