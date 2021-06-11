@@ -1,6 +1,6 @@
 import { Entity } from "./Entity";
 import { EntityType } from "./EntityType";
-import { ENTITY_TYPE_LAYER_PRIORITY } from "./ENTITY_TYPE_LAYER_PRIORITY";
+import { ENTITY_TYPE_LAYER_PRIORITY } from "./constants";
 
 export class EntityLayers {
     constructor() {

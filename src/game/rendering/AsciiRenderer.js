@@ -1,5 +1,5 @@
 import React from "react";
-import { Creature, CREATURE_TYPE } from "../Creature";
+import { Creature, CreatureType } from "../creature";
 import { Dungeon } from "../dungeon";
 import { Entity, EntityLayers } from "../entities";
 import { EntityType } from "../entities/EntityType";
@@ -18,9 +18,9 @@ const entitySymbol = (entity) => {
              */
             const creature = entity.entityData;
             switch (creature.type) {
-                case CREATURE_TYPE.PLAYER_HUMAN:
-                case CREATURE_TYPE.PLAYER_ELF:
-                case CREATURE_TYPE.PLAYER_DWARF:
+                case CreatureType.PlayerHuman:
+                case CreatureType.PlayerElf:
+                case CreatureType.PlayerDwarf:
                     return "@";
                 default:
                     return "M";

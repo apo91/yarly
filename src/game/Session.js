@@ -1,6 +1,7 @@
+import seedrandom from "seedrandom";
 import random from "random";
 import EventEmitter from "events";
-import { Creature, CREATURE_TYPE } from "./Creature";
+import { Creature, CreatureType } from "./creature";
 import { PlayerInput } from "./PlayerInput";
 import { Dungeon, DungeonConfig, MoveEntityResult } from "./dungeon";
 import { Entity, EntityType } from "./entities";
@@ -19,9 +20,9 @@ export class Session {
      * @param {SessionConfig} config
      */
     constructor(config) {
-        this.rng = random.clone("1337");
+        this.rng = random.clone(seedrandom("1337"));
         this.player = new Entity(EntityType.Creature,
-            new Creature(CREATURE_TYPE.PLAYER_ELF, 0));
+            new Creature(CreatureType.PlayerElf, 0));
         this.dungeon = new Dungeon(this.rng, this.player, config.dungeonConfig);
         this.isPlayerTurn = true;
         this.turnCounter = 0;
@@ -43,7 +44,6 @@ export class Session {
                 const [x, y] = this.dungeon.getEntityCoords(this.player);
                 const entityLayers = this.dungeon.getEntityLayers(x, y);
                 const topItemEntity = entityLayers.getTopEntityOfType(EntityType.Item);
-                // console.log("topEntity", topEntity);
                 if (
                     topItemEntity &&
                     topItemEntity.entityData.type == ITEM_TYPE.CONSUMABLE
