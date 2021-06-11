@@ -4,7 +4,7 @@ import { Consumable } from "../Consumable";
 import { DIRECTION_OFFSETS } from "../Direction";
 import { Entity, EntityLayers, EntityType } from "../entities";
 import { Item, ITEM_TYPE } from "../Item";
-import { TILE_TYPE } from "../tiles";
+import { TileType } from "../TileType";
 import { isect, shuffle } from "../utils";
 import { LayoutGeneratorAction, randomLayoutGeneratorAction } from "./LayoutGeneratorAction";
 import { MoveEntityResult } from "./MoveEntityResult";
@@ -29,7 +29,7 @@ export class Dungeon extends EventEmitter {
         this.height = config.height;
         const bufferSize = config.width * config.height;
         /**
-         * @type {number[]}
+         * @type {TileType[]}
          */
         this.layoutTilesBuffer = new Array(bufferSize);
         /**
@@ -53,6 +53,7 @@ export class Dungeon extends EventEmitter {
     /**
      * @param {number} x
      * @param {number} y
+     * @return {TileType}
      */
     getTile(x, y) {
         return this.layoutTilesBuffer[this.getIndexFromCoords(x, y)];
@@ -94,7 +95,7 @@ export class Dungeon extends EventEmitter {
             return [MoveEntityResult.MoveIntoObstacle];
         const newTileIndex = this.getIndexFromCoords(newX, newY);
         const targetEntityLayers = this.entityLayersBuffer[newTileIndex];
-        if (this.layoutTilesBuffer[newTileIndex] === TILE_TYPE.WALL) {
+        if (this.layoutTilesBuffer[newTileIndex] === TileType.Wall) {
             return [MoveEntityResult.MoveIntoObstacle];
         } else if (entity.type === EntityType.Creature && targetEntityLayers.hasCreature) {
             return [MoveEntityResult.MoveIntoCreature, targetEntityLayers.getTopEntity()];
@@ -153,7 +154,7 @@ export class Dungeon extends EventEmitter {
                 }
             }
         }
-        this.layoutTilesBuffer.fill(TILE_TYPE.WALL);
+        this.layoutTilesBuffer.fill(TileType.Wall);
         const tw = 1 / this.width;
         const th = 1 / this.height;
         let i = 0;
@@ -164,14 +165,14 @@ export class Dungeon extends EventEmitter {
                 const xw = x0 + tw;
                 const yh = y0 + th;
                 for (const segment of segments) {
-                    if (this.layoutTilesBuffer[i] != TILE_TYPE.EMPTY) {
+                    if (this.layoutTilesBuffer[i] != TileType.Empty) {
                         const isCellIntersected =
                             isect(segment, [[x0, y0], [xw, y0]]) ||
                             isect(segment, [[xw, y0], [xw, yh]]) ||
                             isect(segment, [[xw, yh], [x0, yh]]) ||
                             isect(segment, [[x0, yh], [x0, y0]]);
                         if (isCellIntersected) {
-                            this.layoutTilesBuffer[i] = TILE_TYPE.EMPTY;
+                            this.layoutTilesBuffer[i] = TileType.Empty;
                             this.emptyTileIndexes.push(i);
                         }
                     }
@@ -185,8 +186,8 @@ export class Dungeon extends EventEmitter {
         if (entryTileIndex && exitTileIndex) {
             this.entryTileIndex = entryTileIndex;
             this.exitTileIndex = exitTileIndex;
-            this.layoutTilesBuffer[entryTileIndex] = TILE_TYPE.ENTRY;
-            this.layoutTilesBuffer[exitTileIndex] = TILE_TYPE.EXIT;
+            this.layoutTilesBuffer[entryTileIndex] = TileType.Entry;
+            this.layoutTilesBuffer[exitTileIndex] = TileType.Exit;
         } else {
             throw new Error("Not enough empty tiles even for entry and exit!")
         }

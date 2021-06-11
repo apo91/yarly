@@ -7,6 +7,7 @@ import { Dungeon, DungeonConfig, MoveEntityResult } from "./dungeon";
 import { Entity, EntityType } from "./entities";
 import { AsciiRenderer } from "./rendering/AsciiRenderer";
 import { ITEM_TYPE } from "./Item";
+import { TileType } from "./TileType";
 
 /**
  * @typedef {Object} SessionConfig
@@ -26,7 +27,7 @@ export class Session {
         this.dungeon = new Dungeon(this.rng, this.player, config.dungeonConfig);
         this.isPlayerTurn = true;
         this.turnCounter = 0;
-        this.pickupItem = "";
+        this.tileInfo = "";
         this.gameLoop = new EventEmitter();
         this.input = new PlayerInput();
         this.renderer = new AsciiRenderer(config.viewportConfig);
@@ -42,15 +43,20 @@ export class Session {
         switch (status) {
             case MoveEntityResult.MoveSuccess: {
                 const [x, y] = this.dungeon.getEntityCoords(this.player);
+                const tileType = this.dungeon.getTile(x, y);
                 const entityLayers = this.dungeon.getEntityLayers(x, y);
                 const topItemEntity = entityLayers.getTopEntityOfType(EntityType.Item);
                 if (
                     topItemEntity &&
                     topItemEntity.entityData.type == ITEM_TYPE.CONSUMABLE
                 ) {
-                    this.pickupItem = topItemEntity.entityData.data.name;
+                    this.tileInfo = topItemEntity.entityData.data.name;
+                } else if (tileType === TileType.Exit) {
+                    this.tileInfo = "A downward staircase";
+                } else if (tileType === TileType.Entry) {
+                    this.tileInfo = "An upward staircase";
                 } else {
-                    this.pickupItem = "";
+                    this.tileInfo = "";
                 }
                 break;
             }

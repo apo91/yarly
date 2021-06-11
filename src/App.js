@@ -3,9 +3,9 @@ import { useEffect, useRef } from 'react';
 import { Session } from './game/Session';
 import { atom, useAtom } from "jotai";
 
-const viewportHtmlAtom = atom(<div>1</div>);
+const viewportHtmlAtom = atom(null);
 const turnCounterAtom = atom(0);
-const pickupItemAtom = atom("");
+const tileInfoAtom = atom("");
 
 const TurnCounter = (props) =>
   <div style={{
@@ -16,7 +16,7 @@ const TurnCounter = (props) =>
     {props.children}
   </div>;
 
-const PickupItem = (props) =>
+const TileInfo = (props) =>
   <div style={{
     position: "fixed",
     top: "40px",
@@ -29,7 +29,7 @@ function App() {
   const sessionRef = useRef(null);
   const [viewportHtml, setViewportHtml] = useAtom(viewportHtmlAtom);
   const [turnCounter, setTurnCounter] = useAtom(turnCounterAtom);
-  const [pickupItem, setPickupItem] = useAtom(pickupItemAtom);
+  const [tileInfo, setTileInfo] = useAtom(tileInfoAtom);
   useEffect(() => {
     const session = new Session({
       dungeonConfig: {
@@ -47,7 +47,7 @@ function App() {
     const invalidateViewport = () => {
       setViewportHtml(session.renderer.render(session.dungeon));
       setTurnCounter(session.turnCounter);
-      setPickupItem(session.pickupItem);
+      setTileInfo(session.tileInfo);
     };
     session.gameLoop.on("playerTurnEnd", invalidateViewport);
     invalidateViewport();
@@ -57,9 +57,9 @@ function App() {
       <TurnCounter>
         {turnCounter}
       </TurnCounter>
-      <PickupItem>
-        {pickupItem}
-      </PickupItem>
+      <TileInfo>
+        {tileInfo}
+      </TileInfo>
       <div style={{ width: "1024px" }}>
         {viewportHtml}
       </div>

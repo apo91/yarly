@@ -3,12 +3,13 @@ import { Creature, CreatureType } from "../creature";
 import { Dungeon } from "../dungeon";
 import { Entity, EntityLayers } from "../entities";
 import { EntityType } from "../entities/EntityType";
-import { TILE_TYPE } from "../tiles";
+import { TileType } from "../TileType";
 import { RenderedTile, TilesContainer } from "./AsciiRenderer.styled";
 import "./ViewportConfig";
 
 /**
  * @param {Entity} entity
+ * @returns {string}
  */
 const entitySymbol = (entity) => {
     switch (entity.type) {
@@ -32,36 +33,48 @@ const entitySymbol = (entity) => {
     }
 }
 
+/**
+ * @param {TileType} tileType
+ * @returns {string}
+ */
 const tileTypeSymbol = (tileType) => {
     switch (tileType) {
-        case TILE_TYPE.WALL:
+        case TileType.Wall:
             return "#";
-        case TILE_TYPE.ENTRY:
+        case TileType.Entry:
             return "<";
-        case TILE_TYPE.EXIT:
+        case TileType.Exit:
             return ">";
-        case TILE_TYPE.EMPTY:
+        case TileType.Empty:
             return ".";
         default:
             throw new Error(`Unknown tile type ${tileType}!`);
     }
 };
 
-const tileSymbol = (layoutTile, entityLayers) => {
-    return entityLayers.isEmpty()
-        ? tileTypeSymbol(layoutTile)
-        : entitySymbol(entityLayers.getTopEntity());
+/**
+ * @param {TileType} tileType
+ * @param {EntityLayers} entityLayers
+ * @returns {string}
+ */
+const tileSymbol = (tileType, entityLayers) => {
+    if (entityLayers.isEmpty()) {
+        return tileTypeSymbol(tileType);
+    } else {
+        const topEntity = entityLayers.getTopEntity();
+        return topEntity ? entitySymbol(topEntity) : "";
+    }
 }
 
 /**
- *
- * @param {number} layoutTile
+ * @param {TileType} tileType
  * @param {EntityLayers} entityLayers
+ * @returns {string}
  */
-const tileForegroundColor = (layoutTile, entityLayers) => {
+const tileForegroundColor = (tileType, entityLayers) => {
     if (entityLayers.isEmpty()) {
-        switch (layoutTile) {
-            case TILE_TYPE.EMPTY:
+        switch (tileType) {
+            case TileType.Empty:
                 return "rgba(255, 255, 255, 0.75)";
             default:
                 return "rgba(255, 255, 255, 1)";
