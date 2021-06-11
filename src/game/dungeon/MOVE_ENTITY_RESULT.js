@@ -1,5 +1,0 @@
-export const MOVE_ENTITY_RESULT = {
-    MOVE_SUCCESS: 0,
-    MOVE_INTO_OBSTACLE: 1,
-    MOVE_INTO_CREATURE: 2,
-};

@@ -1,4 +1,4 @@
-import { DIRECTION } from "./direction";
+import { Direction } from "./Direction";
 import { EventEmitter } from "events";
 
 export const CREATURE_TYPE = {
@@ -69,7 +69,7 @@ export class Creature extends EventEmitter {
         this.maxMP = calcMaxMP(type, level, []);
         this.currentHP = this.maxHP;
         this.currentMP = this.maxMP;
-        this.direction = DIRECTION.NORTH;
+        this.direction = Direction.North;
     }
     applyEffect() { }
     updateEffects() { }

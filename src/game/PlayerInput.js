@@ -1,5 +1,5 @@
 import EventEmitter from "events";
-import { DIRECTION } from "./direction";
+import { Direction } from "./Direction";
 
 export class PlayerInput extends EventEmitter {
     constructor() {
@@ -13,38 +13,38 @@ export class PlayerInput extends EventEmitter {
         window.removeEventListener('keydown', this.handleWindowKeyDown);
     }
     /**
-     * 
-     * @param {KeyboardEvent} e 
+     *
+     * @param {KeyboardEvent} e
      */
     handleWindowKeyDown = (e) => {
         switch (e.code) {
             case "Numpad8":
             case "ArrowUp":
-                this.emit("move", DIRECTION.NORTH);
+                this.emit("move", Direction.North);
                 break;
             case "Numpad6":
             case "ArrowRight":
-                this.emit("move", DIRECTION.EAST);
+                this.emit("move", Direction.East);
                 break;
             case "Numpad2":
             case "ArrowDown":
-                this.emit("move", DIRECTION.SOUTH);
+                this.emit("move", Direction.South);
                 break;
             case "Numpad4":
             case "ArrowLeft":
-                this.emit("move", DIRECTION.WEST);
+                this.emit("move", Direction.West);
                 break;
             case "Numpad9":
-                this.emit("move", DIRECTION.NORTH_EAST);
+                this.emit("move", Direction.NorthEast);
                 break;
             case "Numpad3":
-                this.emit("move", DIRECTION.SOUTH_EAST);
+                this.emit("move", Direction.SouthEast);
                 break;
             case "Numpad1":
-                this.emit("move", DIRECTION.SOUTH_WEST);
+                this.emit("move", Direction.SouthWest);
                 break;
             case "Numpad7":
-                this.emit("move", DIRECTION.NORTH_WEST);
+                this.emit("move", Direction.NorthWest);
                 break;
         }
     }

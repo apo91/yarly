@@ -1,8 +1,8 @@
 import React from "react";
 import { Creature, CREATURE_TYPE } from "../Creature";
 import { Dungeon } from "../dungeon";
-import { EntityLayers, ENTITY_TYPE } from "../entities";
-import { Entity } from "../entities/Entity";
+import { Entity, EntityLayers } from "../entities";
+import { EntityType } from "../entities/EntityType";
 import { TILE_TYPE } from "../tiles";
 import { RenderedTile, TilesContainer } from "./AsciiRenderer.styled";
 import "./ViewportConfig";
@@ -12,11 +12,11 @@ import "./ViewportConfig";
  */
 const entitySymbol = (entity) => {
     switch (entity.type) {
-        case ENTITY_TYPE.CREATURE: {
+        case EntityType.Creature: {
             /**
              * @type {Creature}
              */
-            const creature = entity.data;
+            const creature = entity.entityData;
             switch (creature.type) {
                 case CREATURE_TYPE.PLAYER_HUMAN:
                 case CREATURE_TYPE.PLAYER_ELF:
@@ -26,7 +26,7 @@ const entitySymbol = (entity) => {
                     return "M";
             }
         };
-        case ENTITY_TYPE.ITEM: {
+        case EntityType.Item: {
             return "i";
         };
     }
@@ -68,13 +68,13 @@ const tileForegroundColor = (layoutTile, entityLayers) => {
         }
     } else {
         const topEntity = entityLayers.getTopEntity();
-        switch (topEntity.type) {
-            case ENTITY_TYPE.CREATURE:
+        switch (topEntity?.type) {
+            case EntityType.Creature:
                 return "rgba(255, 128, 255, 0.75)";
-            case ENTITY_TYPE.ITEM:
+            case EntityType.Item:
                 return "rgba(128, 128, 255, 0.75)";
             default:
-                throw new Error(`Unknown entity type ${topEntity.type}!`);
+                throw new Error(`Unknown entity type ${topEntity?.type}!`);
         }
     }
 };

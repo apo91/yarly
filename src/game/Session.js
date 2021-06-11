@@ -2,9 +2,8 @@ import random from "random";
 import EventEmitter from "events";
 import { Creature, CREATURE_TYPE } from "./Creature";
 import { PlayerInput } from "./PlayerInput";
-import { Dungeon, DungeonConfig, MOVE_ENTITY_RESULT } from "./dungeon";
-import { ENTITY_TYPE } from "./entities";
-import { Entity } from "./entities/Entity";
+import { Dungeon, DungeonConfig, MoveEntityResult } from "./dungeon";
+import { Entity, EntityType } from "./entities";
 import { AsciiRenderer } from "./rendering/AsciiRenderer";
 import { ITEM_TYPE } from "./Item";
 
@@ -21,7 +20,7 @@ export class Session {
      */
     constructor(config) {
         this.rng = random.clone("1337");
-        this.player = new Entity(ENTITY_TYPE.CREATURE,
+        this.player = new Entity(EntityType.Creature,
             new Creature(CREATURE_TYPE.PLAYER_ELF, 0));
         this.dungeon = new Dungeon(this.rng, this.player, config.dungeonConfig);
         this.isPlayerTurn = true;
@@ -40,26 +39,26 @@ export class Session {
         if (!this.isPlayerTurn) return;
         const [status, _] = this.dungeon.tryMoveEntity(this.player, direction);
         switch (status) {
-            case MOVE_ENTITY_RESULT.MOVE_SUCCESS: {
+            case MoveEntityResult.MoveSuccess: {
                 const [x, y] = this.dungeon.getEntityCoords(this.player);
                 const entityLayers = this.dungeon.getEntityLayers(x, y);
-                const topItemEntity = entityLayers.getTopEntityOfType(ENTITY_TYPE.ITEM);
+                const topItemEntity = entityLayers.getTopEntityOfType(EntityType.Item);
                 // console.log("topEntity", topEntity);
                 if (
                     topItemEntity &&
-                    topItemEntity.data.type == ITEM_TYPE.CONSUMABLE
+                    topItemEntity.entityData.type == ITEM_TYPE.CONSUMABLE
                 ) {
-                    this.pickupItem = topItemEntity.data.data.name;
+                    this.pickupItem = topItemEntity.entityData.data.name;
                 } else {
                     this.pickupItem = "";
                 }
                 break;
             }
-            case MOVE_ENTITY_RESULT.MOVE_INTO_CREATURE: {
+            case MoveEntityResult.MoveIntoCreature: {
                 // attack
                 break;
             }
-            case MOVE_ENTITY_RESULT.MOVE_INTO_OBSTACLE: {
+            case MoveEntityResult.MoveIntoObstacle: {
                 return;
             }
         }

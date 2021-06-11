@@ -1,6 +1,14 @@
+import { EntityType } from "./EntityType";
+
 export class Entity {
     constructor(type, data) {
+        /**
+         * @type {EntityType}
+         */
         this.type = type;
-        this.data = data;
+        /**
+         * @type {Object}
+         */
+        this.entityData = data;
     }
 }

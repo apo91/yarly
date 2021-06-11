@@ -1,10 +1,16 @@
 import { Entity } from "./Entity";
-import { ENTITY_TYPE } from "./ENTITY_TYPE";
+import { EntityType } from "./EntityType";
 import { ENTITY_TYPE_LAYER_PRIORITY } from "./ENTITY_TYPE_LAYER_PRIORITY";
 
 export class EntityLayers {
     constructor() {
+        /**
+         * @type {Entity[]}
+         */
         this.entities = [];
+        /**
+         * @type {boolean}
+         */
         this.hasCreature = false;
     }
     /**
@@ -14,14 +20,14 @@ export class EntityLayers {
         return this.entities.length === 0;
     }
     /**
-     * @returns {Entity}
+     * @returns {Entity | undefined}
      */
     getTopEntity() {
         return this.entities[this.entities.length - 1];
     }
     /**
-     * @param {number} type
-     * @returns {Entity}
+     * @param {EntityType} type
+     * @returns {Entity | undefined}
      */
     getTopEntityOfType(type) {
         for (let i = 0; i < this.entities.length; i++) {
@@ -42,7 +48,7 @@ export class EntityLayers {
      * @param {Entity} entity
      */
     addEntity(entity) {
-        if (entity.type === ENTITY_TYPE.CREATURE) {
+        if (entity.type === EntityType.Creature) {
             if (this.hasCreature) {
                 throw new Error("EntityLayers.addEntity - attempt to add creature to the tile where creature is already present!");
             }
@@ -81,7 +87,7 @@ export class EntityLayers {
             const entityFromBuffer = this.entities[i];
             if (entityFromBuffer === entity) {
                 this.entities.splice(i, 1);
-                if (entity.type === ENTITY_TYPE.CREATURE) {
+                if (entity.type === EntityType.Creature) {
                     this.hasCreature = false;
                 }
                 return true;
