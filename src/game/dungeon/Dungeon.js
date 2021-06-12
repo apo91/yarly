@@ -8,6 +8,7 @@ import { TileType } from "../TileType";
 import { isect, shuffle } from "../utils";
 import { LayoutGeneratorAction, randomLayoutGeneratorAction } from "./LayoutGeneratorAction";
 import { MoveEntityResult } from "./MoveEntityResult";
+import { Noise } from "noisejs";
 
 /**
  * @typedef {Object} DungeonConfig
@@ -33,6 +34,14 @@ export class Dungeon extends EventEmitter {
          */
         this.layoutTilesBuffer = new Array(bufferSize);
         /**
+         * @type {string[]}
+         */
+        this.tileBackgroundColors = new Array(bufferSize);
+        /**
+         * @type {number[]}
+         */
+        this.wallBackgroundGradient = [0, 0, 1];
+        /**
          * @type {EntityLayers[]}
          */
         this.entityLayersBuffer = new Array(bufferSize);
@@ -48,6 +57,7 @@ export class Dungeon extends EventEmitter {
         this.exitTileIndex = -1;
         this.player = player;
         this.generateLayout(rng, config.layoutSegmentsCount);
+        this.colorizeLayout(rng);
         this.generateEntities(rng, player, config.entitiesCount)
     }
     /**
@@ -194,6 +204,27 @@ export class Dungeon extends EventEmitter {
     }
     /**
      * @param {Random} rng
+     */
+    colorizeLayout = (rng) => {
+        const randomGradient = [rng.next(), rng.next(), rng.next()];
+        const randomGradientLength = Math.sqrt(randomGradient.reduce((acc, x) => acc + x * x, 0));
+        this.wallBackgroundGradient = randomGradient.map(x => x / randomGradientLength);
+        const noise = new Noise(rng.next());
+        for (let i = 0; i < this.layoutTilesBuffer.length; i++) {
+            if (this.layoutTilesBuffer[i] === TileType.Wall) {
+                const [x, y] = this.getCoordsFromIndex(i);
+                const nx = x / this.width;
+                const ny = y / this.height;
+                const z = fbm(3, 11.29, 0.51, nx, ny, (x, y) => (1 + noise.perlin2(x, y)) / 2);
+                const r = z * this.wallBackgroundGradient[0] * 255;
+                const g = z * this.wallBackgroundGradient[1] * 255; // Math.floor(102 + z * 100);
+                const b = z * this.wallBackgroundGradient[2] * 255; //z * 255;
+                this.tileBackgroundColors[i] = `rgba(${r}, ${g}, ${b}, ${1})`;
+            }
+        }
+    }
+    /**
+     * @param {Random} rng
      * @param {Entity} player
      * @param {number} entitiesCount
      */
@@ -211,4 +242,44 @@ export class Dungeon extends EventEmitter {
             this.entityLayersBuffer[tileIndex].addEntity(entity);
         }
     }
+}
+
+// float fbm(
+//     int octaves,
+//     float lacunarity,
+//     float gain,
+//     float x,
+//     float (*noise_cb)(void*, float),
+//     void* noise_cb_ctx
+// ) {
+//     float amp = 0.5;
+//     float freq = 1;
+//     float y = 0;
+//     for (int i = 0; i < octaves; i++) {
+//         y += amp * noise_cb(noise_cb_ctx, freq * x);
+//         freq *= lacunarity;
+//         amp *= gain;
+//     }
+//     return y;
+// }
+
+/**
+ * @param {number} octaves
+ * @param {number} lacunarity
+ * @param {number} gain
+ * @param {number} x
+ * @param {number} y
+ * @param {(x: number, y: number) => number} noiseFunc
+ * @returns {number}
+ */
+const fbm = (octaves, lacunarity, gain, x, y, noiseFunc) => {
+    let amp = 0.5;
+    let freq = 1;
+    let z = 0;
+    for (let i = 0; i < octaves; i++) {
+        z += amp * noiseFunc(freq * x, freq * y);
+        freq *= lacunarity;
+        amp *= gain;
+    }
+    return z;
 }

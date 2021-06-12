@@ -68,19 +68,19 @@ const tileSymbol = (tileType, entityLayers) => {
 
 /**
  * @param {TileType} tileType
- * @param {EntityLayers} entityLayers
+ * @param {EntityLayers} [entityLayers]
  * @returns {string}
  */
 const tileForegroundColor = (tileType, entityLayers) => {
-    if (entityLayers.isEmpty()) {
+    if (!entityLayers || entityLayers.isEmpty()) {
         switch (tileType) {
             case TileType.Empty:
-                return "rgba(255, 255, 255, 0.75)";
+                return "rgba(255, 255, 255, 0.15)";
             default:
-                return "rgba(255, 255, 255, 1)";
+                return "rgba(255, 255, 255, 0.25)";
         }
     } else {
-        const topEntity = entityLayers.getTopEntity();
+        const topEntity = entityLayers?.getTopEntity();
         switch (topEntity?.type) {
             case EntityType.Creature:
                 return "rgba(255, 128, 255, 0.75)";
@@ -116,11 +116,13 @@ export class AsciiRenderer {
                     x < 0 || x >= dungeon.width ||
                     y < 0 || y >= dungeon.height;
                 if (outOfBounds) {
+                    const [r, g, b] = dungeon.wallBackgroundGradient;
                     tiles.push(
                         <RenderedTile
                             key={dy * this.viewportWidth + dx}
                             tilesPerRow={this.viewportWidth}
-                            color={"white"}
+                            color={tileForegroundColor(TileType.Wall)}
+                            backgroundColor={`rgb(${r * 127}, ${g * 127}, ${b * 127})`}
                         >
                             #
                         </RenderedTile>
@@ -134,6 +136,7 @@ export class AsciiRenderer {
                             key={dy * this.viewportWidth + dx}
                             tilesPerRow={this.viewportWidth}
                             color={tileForegroundColor(layoutTile, entityLayers)}
+                            backgroundColor={dungeon.tileBackgroundColors[tileIndex]}
                         >
                             {tileSymbol(layoutTile, entityLayers)}
                         </RenderedTile>

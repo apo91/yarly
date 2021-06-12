@@ -21,7 +21,7 @@ export class Session {
      * @param {SessionConfig} config
      */
     constructor(config) {
-        this.rng = random.clone(seedrandom("1337"));
+        this.rng = random.clone(seedrandom("1337b"));
         this.player = new Entity(EntityType.Creature,
             new Creature(CreatureType.PlayerElf, 0));
         this.dungeon = new Dungeon(this.rng, this.player, config.dungeonConfig);
