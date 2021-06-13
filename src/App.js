@@ -45,7 +45,7 @@ function App() {
     });
     sessionRef.current = session;
     const invalidateViewport = () => {
-      setViewportHtml(session.renderer.render(session.dungeon));
+      setViewportHtml(session.renderer.render());
       setTurnCounter(session.turnCounter);
       setTileInfo(session.tileInfo);
     };

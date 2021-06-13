@@ -1,4 +1,5 @@
 import React from "react";
+import { Noise } from "noisejs";
 import { Creature, CreatureType } from "../creature";
 import { Dungeon } from "../dungeon";
 import { Entity, EntityLayers } from "../entities";
@@ -6,6 +7,8 @@ import { EntityType } from "../entities/EntityType";
 import { TileType } from "../TileType";
 import { RenderedTile, TilesContainer } from "./AsciiRenderer.styled";
 import "./ViewportConfig";
+import { Random } from "random";
+import { fbm } from "../utils";
 
 /**
  * @param {Entity} entity
@@ -94,17 +97,55 @@ const tileForegroundColor = (tileType, entityLayers) => {
 
 export class AsciiRenderer {
     /**
+     * @param {Random} rng
+     * @param {Dungeon} dungeon
      * @param {ViewportConfig} viewportConfig
      */
-    constructor(viewportConfig) {
+    constructor(rng, dungeon, viewportConfig) {
+        this.dungeon = dungeon;
         this.viewportWidth = viewportConfig.width;
         this.viewportHeight = viewportConfig.height;
+        this.wallBackgroundGradient = [0, 0, 0];
+        this.bgCacheOffsetX = Math.floor(this.viewportWidth / 2);
+        this.bgCacheOffsetY = Math.floor(this.viewportHeight / 2);
+        this.bgCacheWidth = this.dungeon.width + viewportConfig.width;
+        this.bgCacheHeight = this.dungeon.height * viewportConfig.height;
+        this.bgCache = new Array(this.bgCacheWidth * this.bgCacheHeight);
+        this.noise = new Noise(rng.next());
+        this.generateColours(rng);
     }
     /**
-     * @param {Dungeon} dungeon
+     * @param {Random} rng
      */
-    render(dungeon) {
-        const [playerX, playerY] = dungeon.getEntityCoords(dungeon.player);
+    generateColours = (rng) => {
+        const randomGradient = [rng.next(), rng.next(), rng.next()];
+        const randomGradientLength = Math.sqrt(randomGradient.reduce((acc, x) => acc + x * x, 0));
+        this.wallBackgroundGradient = randomGradient.map(x => x / randomGradientLength);
+    }
+    /**
+     * @param {number} x
+     * @param {number} y
+     */
+    getWallBackgroundColor = (x, y) => {
+        const cacheIndex = (this.bgCacheOffsetY + y) * this.bgCacheWidth + (this.bgCacheOffsetX + x);
+        const cachedValue = this.bgCache[cacheIndex];
+        if (cachedValue) {
+            return cachedValue;
+        } else {
+            const nx = x / this.dungeon.width;
+            const ny = y / this.dungeon.height;
+            const z = fbm(3, 11.29, 0.51, nx, ny, (x, y) => (1 + this.noise.perlin2(x, y)) / 2);
+            const grad = this.wallBackgroundGradient;
+            const r = z * grad[0] * 255;
+            const g = z * grad[1] * 255;
+            const b = z * grad[2] * 255;
+            const bgColor = `rgb(${r}, ${g}, ${b})`;
+            this.bgCache[cacheIndex] = bgColor;
+            return bgColor;
+        }
+    }
+    render() {
+        const [playerX, playerY] = this.dungeon.getEntityCoords(this.dungeon.player);
         const x0 = playerX - Math.floor(this.viewportWidth / 2);
         const y0 = playerY - Math.floor(this.viewportHeight / 2);
         const tiles = [];
@@ -113,30 +154,34 @@ export class AsciiRenderer {
                 const x = x0 + dx;
                 const y = y0 + dy;
                 const outOfBounds =
-                    x < 0 || x >= dungeon.width ||
-                    y < 0 || y >= dungeon.height;
+                    x < 0 || x >= this.dungeon.width ||
+                    y < 0 || y >= this.dungeon.height;
+                const tileIndex = this.dungeon.getIndexFromCoords(x, y);
+                const isWall = outOfBounds ||
+                    this.dungeon.layoutTilesBuffer[tileIndex] === TileType.Wall;
+                const bgColor = isWall
+                    ? this.getWallBackgroundColor(x, y)
+                    : "default";
                 if (outOfBounds) {
-                    const [r, g, b] = dungeon.wallBackgroundGradient;
                     tiles.push(
                         <RenderedTile
                             key={dy * this.viewportWidth + dx}
                             tilesPerRow={this.viewportWidth}
                             color={tileForegroundColor(TileType.Wall)}
-                            backgroundColor={`rgb(${r * 127}, ${g * 127}, ${b * 127})`}
+                            backgroundColor={bgColor}
                         >
                             #
                         </RenderedTile>
                     );
                 } else {
-                    const tileIndex = dungeon.getIndexFromCoords(x, y);
-                    const layoutTile = dungeon.layoutTilesBuffer[tileIndex];
-                    const entityLayers = dungeon.entityLayersBuffer[tileIndex];
+                    const layoutTile = this.dungeon.layoutTilesBuffer[tileIndex];
+                    const entityLayers = this.dungeon.entityLayersBuffer[tileIndex];
                     tiles.push(
                         <RenderedTile
                             key={dy * this.viewportWidth + dx}
                             tilesPerRow={this.viewportWidth}
                             color={tileForegroundColor(layoutTile, entityLayers)}
-                            backgroundColor={dungeon.tileBackgroundColors[tileIndex]}
+                            backgroundColor={bgColor}
                         >
                             {tileSymbol(layoutTile, entityLayers)}
                         </RenderedTile>

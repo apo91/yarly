@@ -21,7 +21,7 @@ export class Session {
      * @param {SessionConfig} config
      */
     constructor(config) {
-        this.rng = random.clone(seedrandom("1337b"));
+        this.rng = random.clone(seedrandom("1337e"));
         this.player = new Entity(EntityType.Creature,
             new Creature(CreatureType.PlayerElf, 0));
         this.dungeon = new Dungeon(this.rng, this.player, config.dungeonConfig);
@@ -30,7 +30,7 @@ export class Session {
         this.tileInfo = "";
         this.gameLoop = new EventEmitter();
         this.input = new PlayerInput();
-        this.renderer = new AsciiRenderer(config.viewportConfig);
+        this.renderer = new AsciiRenderer(this.rng, this.dungeon, config.viewportConfig);
         this.setupEventListeners();
     }
     setupEventListeners = () => {
