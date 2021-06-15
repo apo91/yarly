@@ -144,10 +144,11 @@ export class AsciiRenderer {
             const b = z * grad[2] * 255;
             bgColor = `rgb(${r}, ${g}, ${b})`;
         }
+        const key = (y + this.tilesCacheOffsetY) * this.tilesCacheHeight + (x + this.tilesCacheOffsetX);
         if (isOutOfBounds) {
             return (
                 <RenderedTile
-                    key={y * this.viewportWidth + x}
+                    key={key}
                     tilesPerRow={this.viewportWidth}
                     color={tileForegroundColor(TileType.Wall)}
                     backgroundColor={bgColor}
@@ -160,7 +161,7 @@ export class AsciiRenderer {
             const entityLayers = this.dungeon.entityLayersBuffer[tileIndex];
             return (
                 <RenderedTile
-                    key={y * this.viewportWidth + x}
+                    key={key}
                     tilesPerRow={this.viewportWidth}
                     color={
                         includeEntities
