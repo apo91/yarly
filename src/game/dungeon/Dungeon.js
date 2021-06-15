@@ -212,7 +212,7 @@ export class Dungeon extends EventEmitter {
         this.tileIndexByEntityRef.set(player, this.entryTileIndex);
         for (const tileIndex of this.emptyTileIndexes.slice(0, entitiesCount)) {
             const entity = new Entity(EntityType.Item,
-                new Item(ItemType.Consumable, new Consumable(rng))
+                new Item(ItemType.Consumable, 1, new Consumable(rng))
             );
             this.tileIndexByEntityRef.set(entity, tileIndex);
             this.entityLayersBuffer[tileIndex].addEntity(entity);
