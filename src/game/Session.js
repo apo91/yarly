@@ -6,7 +6,7 @@ import { PlayerInput } from "./PlayerInput";
 import { Dungeon, DungeonConfig, MoveEntityResult } from "./dungeon";
 import { Entity, EntityType } from "./entities";
 import { AsciiRenderer } from "./rendering/AsciiRenderer";
-import { ITEM_TYPE } from "./Item";
+import { ItemType } from "./item";
 import { TileType } from "./TileType";
 
 /**
@@ -34,7 +34,8 @@ export class Session {
         this.setupEventListeners();
     }
     setupEventListeners = () => {
-        this.input.on("move", this.handlePlayerMove)
+        this.input.on("move", this.handlePlayerMove);
+        this.input.on("pickup", this.handlePlayerPickup);
         this.gameLoop.on("playerTurnEnd", this.performComputerTurn);
     }
     handlePlayerMove = (direction) => {
@@ -48,9 +49,9 @@ export class Session {
                 const topItemEntity = entityLayers.getTopEntityOfType(EntityType.Item);
                 if (
                     topItemEntity &&
-                    topItemEntity.entityData.type == ITEM_TYPE.CONSUMABLE
+                    topItemEntity.entityData.type == ItemType.Consumable
                 ) {
-                    this.tileInfo = topItemEntity.entityData.data.name;
+                    this.tileInfo = topItemEntity.entityData.itemData.name;
                 } else if (tileType === TileType.Exit) {
                     this.tileInfo = "A downward staircase";
                 } else if (tileType === TileType.Entry) {
@@ -71,6 +72,21 @@ export class Session {
         this.isPlayerTurn = false;
         this.gameLoop.emit("playerTurnEnd");
 
+    }
+    handlePlayerPickup = () => {
+        const [x, y] = this.dungeon.getEntityCoords(this.player);
+        const entityLayers = this.dungeon.getEntityLayers(x, y);
+        const topItemEntity = entityLayers.getTopEntityOfType(EntityType.Item);
+        if (topItemEntity) {
+            this.player.entityData.inventory.push(topItemEntity.entityData);
+            this.dungeon.removeEntity(topItemEntity);
+            const newTopItemEntity = entityLayers.getTopEntityOfType(EntityType.Item);
+            this.tileInfo = newTopItemEntity
+                ? newTopItemEntity.entityData.itemData.name
+                : "";
+            this.isPlayerTurn = false;
+            this.gameLoop.emit("playerTurnEnd");
+        }
     }
     performComputerTurn = () => {
         this.turnCounter++;

@@ -46,6 +46,9 @@ export class PlayerInput extends EventEmitter {
             case "Numpad7":
                 this.emit("move", Direction.NorthWest);
                 break;
+            case "Numpad5":
+                this.emit("pickup");
+                break;
         }
     }
 }

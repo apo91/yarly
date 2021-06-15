@@ -1,6 +1,7 @@
 import { Entity } from "./Entity";
 import { EntityType } from "./EntityType";
 import { ENTITY_TYPE_LAYER_PRIORITY } from "./constants";
+import { Item } from "../item";
 
 export class EntityLayers {
     constructor() {
@@ -27,7 +28,7 @@ export class EntityLayers {
     }
     /**
      * @param {EntityType} type
-     * @returns {Entity | undefined}
+     * @returns {Entity<Item> | undefined}
      */
     getTopEntityOfType(type) {
         for (let i = 0; i < this.entities.length; i++) {
