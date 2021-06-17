@@ -6,7 +6,7 @@ import { PlayerInput } from "./PlayerInput";
 import { Dungeon, DungeonConfig, MoveEntityResult } from "./dungeon";
 import { Entity, EntityType } from "./entities";
 import { AsciiRenderer } from "./rendering/AsciiRenderer";
-import { ItemType } from "./item";
+import { ItemType } from "./items";
 import { TileType } from "./TileType";
 
 /**

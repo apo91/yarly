@@ -3,7 +3,7 @@ import { Direction } from "../Direction";
 import { CreatureAction } from "./CreatureAction";
 import { CreatureType } from "./CreatureType";
 import * as constants from "./constants";
-import { Item } from "../item";
+import { Item } from "../items";
 
 /**
  * @param {CreatureType} type

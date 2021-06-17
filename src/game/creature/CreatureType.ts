@@ -6,3 +6,9 @@ export enum CreatureType {
     Kobold = "KOBOLD",
     Orc = "ORC",
 };
+
+const CREATURE_TYPE = {
+    GOBLIN: "GOBLIN",
+    KOBOLD: "KOBOLD",
+    ORC: "ORC",
+};

@@ -1,9 +1,8 @@
 import EventEmitter from "events";
 import { Random } from "random";
-import { Consumable } from "../Consumable";
 import { DIRECTION_OFFSETS } from "../Direction";
 import { Entity, EntityLayers, EntityType } from "../entities";
-import { Item, ItemType } from "../item";
+import { Item, ItemType, Consumable } from "../items";
 import { TileType } from "../TileType";
 import { isect, shuffle } from "../utils";
 import { LayoutGeneratorAction, randomLayoutGeneratorAction } from "./LayoutGeneratorAction";

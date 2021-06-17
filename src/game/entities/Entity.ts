@@ -1,6 +1,6 @@
 import { EntityType } from "./EntityType";
 import { Creature } from "../creature";
-import { Item } from "../item";
+import { Item } from "../items";
 
 export class Entity<T extends Creature | Item<any>> {
     type: EntityType;

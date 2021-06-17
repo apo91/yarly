@@ -1,4 +1,4 @@
-import { Consumable } from "../Consumable";
+import { Consumable } from "./Consumable";
 import { ItemType } from "./ItemType";
 
 export class Item<T> {
