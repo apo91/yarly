@@ -49,9 +49,9 @@ export class Session {
                 const topItemEntity = entityLayers.getTopEntityOfType(EntityType.Item);
                 if (
                     topItemEntity &&
-                    topItemEntity.entityData.type == ItemType.Consumable
+                    topItemEntity.entityData.itemType === ItemType.Consumable
                 ) {
-                    this.tileInfo = topItemEntity.entityData.itemData.name;
+                    this.tileInfo = topItemEntity.entityData.initialName;
                 } else if (tileType === TileType.Exit) {
                     this.tileInfo = "A downward staircase";
                 } else if (tileType === TileType.Entry) {
@@ -82,7 +82,7 @@ export class Session {
             this.dungeon.removeEntity(topItemEntity);
             const newTopItemEntity = entityLayers.getTopEntityOfType(EntityType.Item);
             this.tileInfo = newTopItemEntity
-                ? newTopItemEntity.entityData.itemData.name
+                ? newTopItemEntity.entityData.initialName
                 : "";
             this.isPlayerTurn = false;
             this.gameLoop.emit("playerTurnEnd");

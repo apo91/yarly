@@ -1,16 +1,25 @@
 import { Consumable } from "./Consumable";
 import { ItemType } from "./ItemType";
 
-export class Item<T> {
-    type: ItemType;
+type ItemOptions = {
+    itemType: ItemType;
     weight: number;
-    itemData: T;
-    constructor(type: ItemType, weight: number, data: T) {
-        this.type = type;
-        this.weight = weight;
-        this.itemData = data;
+    initialName: string;
+    identifiedName: string;
+}
+
+export class Item {
+    itemType: ItemType;
+    weight: number;
+    initialName: string;
+    identifiedName: string;
+    constructor(options: ItemOptions) {
+        this.itemType = options.itemType;
+        this.weight = options.weight;
+        this.initialName = options.initialName;
+        this.identifiedName = options.identifiedName;
     }
-    isConsumable(): this is Item<Consumable> {
-        return this.type === ItemType.Consumable;
+    isConsumable(): this is Consumable {
+        return this.itemType === ItemType.Consumable;
     }
 }
