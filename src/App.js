@@ -63,7 +63,7 @@ function App() {
       setViewportHtml(session.renderer.render());
       setTurnCounter(session.turnCounter);
       setTileInfo(session.tileInfo);
-      setInventory(session.player.entityData.inventory.map(item => item.isConsumable() ? item.itemData.name : "?"))
+      setInventory(session.getInventoryItemNames());
     };
     session.gameLoop.on("playerTurnEnd", invalidateViewport);
     invalidateViewport();

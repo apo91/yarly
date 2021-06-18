@@ -2,7 +2,7 @@ import EventEmitter from "events";
 import { Random } from "random";
 import { DIRECTION_OFFSETS } from "../Direction";
 import { Entity, EntityLayers, EntityType } from "../entities";
-import { Item, ItemType, Consumable } from "../items";
+import { Item, ItemType, Consumable, ItemRegistry } from "../items";
 import { TileType } from "../TileType";
 import { isect, shuffle } from "../utils";
 import { LayoutGeneratorAction, randomLayoutGeneratorAction } from "./LayoutGeneratorAction";
@@ -19,10 +19,11 @@ import { MoveEntityResult } from "./MoveEntityResult";
 export class Dungeon extends EventEmitter {
     /**
      * @param {Random} rng
+     * @param {ItemRegistry} itemRegistry
      * @param {Entity} player
      * @param {DungeonConfig} config
      */
-    constructor(rng, player, config) {
+    constructor(rng, itemRegistry, player, config) {
         super();
         this.width = config.width;
         this.height = config.height;
@@ -45,6 +46,7 @@ export class Dungeon extends EventEmitter {
         this.tileIndexByEntityRef = new Map();
         this.entryTileIndex = -1;
         this.exitTileIndex = -1;
+        this.itemRegistry = itemRegistry;
         this.player = player;
         this.generateLayout(rng, config.layoutSegmentsCount);
         this.generateEntities(rng, player, config.entitiesCount)
@@ -211,7 +213,8 @@ export class Dungeon extends EventEmitter {
         this.tileIndexByEntityRef.set(player, this.entryTileIndex);
         for (const tileIndex of this.emptyTileIndexes.slice(0, entitiesCount)) {
             const entity = new Entity(EntityType.Item,
-                new Item(ItemType.Consumable, 1, new Consumable(rng))
+                this.itemRegistry.generateItem()
+                // new Item(ItemType.Consumable, 1, new Consumable(rng))
             );
             this.tileIndexByEntityRef.set(entity, tileIndex);
             this.entityLayersBuffer[tileIndex].addEntity(entity);

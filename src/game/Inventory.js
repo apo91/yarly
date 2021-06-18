@@ -14,13 +14,13 @@ export class Inventory {
          */
         this.currentWeight = 0;
         /**
-         * @type {Map<Item<any>, number>}
+         * @type {Map<Item, number>}
          */
         this.itemQuantities = new Map();
     }
     /**
      * @template T
-     * @param {(item: Item<any>, quantity: number) => T} fn
+     * @param {(item: Item, quantity: number) => T} fn
      * @returns {T[]}
      */
     map(fn) {

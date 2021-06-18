@@ -4,6 +4,7 @@ import { CreatureAction } from "./CreatureAction";
 import { CreatureType } from "./CreatureType";
 import * as constants from "./constants";
 import { Item } from "../items";
+import { Inventory } from "../Inventory";
 
 /**
  * @param {CreatureType} type
@@ -37,10 +38,7 @@ export class Creature extends EventEmitter {
         this.currentHP = this.maxHP;
         this.currentMP = this.maxMP;
         this.direction = Direction.North;
-        /**
-         * @type {Item[]}
-         */
-        this.inventory = [];
+        this.inventory = new Inventory(30);
     }
     applyEffect() { }
     updateEffects() { }

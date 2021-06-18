@@ -6,7 +6,7 @@ import { PlayerInput } from "./PlayerInput";
 import { Dungeon, DungeonConfig, MoveEntityResult } from "./dungeon";
 import { Entity, EntityType } from "./entities";
 import { AsciiRenderer } from "./rendering/AsciiRenderer";
-import { ItemType } from "./items";
+import { Item, ItemRegistry, ItemType } from "./items";
 import { TileType } from "./TileType";
 
 /**
@@ -22,9 +22,14 @@ export class Session {
      */
     constructor(config) {
         this.rng = random.clone(seedrandom("1337e"));
+        this.itemRegistry = new ItemRegistry(this.rng);
+        /**
+         * @type {Set<Item>}
+         */
+        this.identifiedItems = new Set();
         this.player = new Entity(EntityType.Creature,
             new Creature(CreatureType.PlayerElf, 0));
-        this.dungeon = new Dungeon(this.rng, this.player, config.dungeonConfig);
+        this.dungeon = new Dungeon(this.rng, this.itemRegistry, this.player, config.dungeonConfig);
         this.isPlayerTurn = true;
         this.turnCounter = 0;
         this.tileInfo = "";
@@ -78,19 +83,27 @@ export class Session {
         const entityLayers = this.dungeon.getEntityLayers(x, y);
         const topItemEntity = entityLayers.getTopEntityOfType(EntityType.Item);
         if (topItemEntity) {
-            this.player.entityData.inventory.push(topItemEntity.entityData);
-            this.dungeon.removeEntity(topItemEntity);
-            const newTopItemEntity = entityLayers.getTopEntityOfType(EntityType.Item);
-            this.tileInfo = newTopItemEntity
-                ? newTopItemEntity.entityData.initialName
-                : "";
-            this.isPlayerTurn = false;
-            this.gameLoop.emit("playerTurnEnd");
+            if (this.player.entityData.inventory.tryAddItem(topItemEntity.entityData)) {
+                this.dungeon.removeEntity(topItemEntity);
+                const newTopItemEntity = entityLayers.getTopEntityOfType(EntityType.Item);
+                this.tileInfo = newTopItemEntity
+                    ? newTopItemEntity.entityData.initialName
+                    : "";
+                this.isPlayerTurn = false;
+                this.gameLoop.emit("playerTurnEnd");
+            }
         }
     }
     performComputerTurn = () => {
         this.turnCounter++;
         this.isPlayerTurn = true;
         this.gameLoop.emit("computerTurnEnd");
+    }
+    getInventoryItemNames = () => {
+        return this.player.entityData.inventory.map((item, quantity) =>
+            `${this.identifiedItems.has(item)
+                ? item.identifiedName
+                : item.initialName} x${quantity}`
+        );
     }
 }
