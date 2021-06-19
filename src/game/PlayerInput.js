@@ -17,6 +17,7 @@ export class PlayerInput extends EventEmitter {
      * @param {KeyboardEvent} e
      */
     handleWindowKeyDown = (e) => {
+        e.stopImmediatePropagation();
         switch (e.code) {
             case "Numpad8":
             case "ArrowUp":

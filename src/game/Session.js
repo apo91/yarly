@@ -76,7 +76,6 @@ export class Session {
         }
         this.isPlayerTurn = false;
         this.gameLoop.emit("playerTurnEnd");
-
     }
     handlePlayerPickup = () => {
         const [x, y] = this.dungeon.getEntityCoords(this.player);
