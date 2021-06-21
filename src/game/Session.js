@@ -15,12 +15,13 @@ import { TileType } from "./TileType";
  * @property {ViewportConfig} viewportConfig
  */
 
-export class Session {
+export class Session extends EventEmitter {
     /**
      *
      * @param {SessionConfig} config
      */
     constructor(config) {
+        super();
         this.rng = random.clone(seedrandom("1337e"));
         this.itemRegistry = new ItemRegistry(this.rng);
         /**
@@ -37,6 +38,7 @@ export class Session {
         this.input = new PlayerInput();
         this.renderer = new AsciiRenderer(this.rng, this.dungeon, config.viewportConfig);
         this.setupEventListeners();
+        this.emit("log", "Your journey begins");
     }
     setupEventListeners = () => {
         this.input.on("move", this.handlePlayerMove);
@@ -56,7 +58,9 @@ export class Session {
                     topItemEntity &&
                     topItemEntity.entityData.itemType === ItemType.Consumable
                 ) {
-                    this.tileInfo = topItemEntity.entityData.initialName;
+                    const visibleName = topItemEntity.entityData.initialName;
+                    this.emit("log", `You see a ${visibleName}`);
+                    this.tileInfo = visibleName;
                 } else if (tileType === TileType.Exit) {
                     this.tileInfo = "A downward staircase";
                 } else if (tileType === TileType.Entry) {
@@ -90,6 +94,7 @@ export class Session {
                     : "";
                 this.isPlayerTurn = false;
                 this.gameLoop.emit("playerTurnEnd");
+                this.emit("log", `You picked up a ${topItemEntity.entityData.initialName}`);
             }
         }
     }

@@ -1,6 +1,7 @@
 import { useAtom } from "jotai";
 import { useCallback, useEffect, useState } from "react";
 import { Session } from "../../../game/Session";
+import { writeGameLogAtom } from "../gamelog/atoms";
 import { viewportHtmlAtom, turnCounterAtom, tileInfoAtom, inventoryAtom } from "./atoms";
 
 export const useSession = () => {
@@ -8,6 +9,7 @@ export const useSession = () => {
     const [, setTurnCounter] = useAtom(turnCounterAtom);
     const [, setTileInfo] = useAtom(tileInfoAtom);
     const [, setInventory] = useAtom(inventoryAtom);
+    const [, writeLogMessage] = useAtom(writeGameLogAtom);
     const invalidateViewport = useCallback((session) => {
         setViewportHtml(session.renderer.render());
         setTurnCounter(session.turnCounter);
@@ -28,6 +30,7 @@ export const useSession = () => {
             },
         });
         session.gameLoop.on("playerTurnEnd", () => invalidateViewport(session));
+        session.on("log", writeLogMessage);
         return session;
     });
     useEffect(() => {

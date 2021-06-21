@@ -2,6 +2,7 @@ import './App.css';
 import { useAtom } from "jotai";
 import { viewportHtmlAtom, turnCounterAtom, tileInfoAtom, inventoryAtom } from "./atoms";
 import { useSession } from './useSession';
+import { GameLog } from '../gamelog/GameLog';
 
 const TurnCounter = (props) =>
   <div style={{
@@ -53,6 +54,9 @@ function App() {
       </Inventory>
       <div style={{ width: "1024px" }}>
         {viewportHtml}
+      </div>
+      <div style={{ position: "fixed", width: "1024px", height: "140px", bottom: "20px" }}>
+        <GameLog />
       </div>
     </div>
   );

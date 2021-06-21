@@ -1,15 +1,16 @@
-import { useEffect } from "react";
+import { useAtom } from "jotai";
+import { gameLogAtom } from "./atoms";
+import { LogContainer, LogMessage } from "./GameLog.styled";
 
 export const GameLog = (props) => {
-    // useState()
-    // useEffect()
+    const [logMessages] = useAtom(gameLogAtom);
     return (
-        <div>
-            {props.messages.map(message => (
-                <div>
+        <LogContainer>
+            {logMessages.map(message => (
+                <LogMessage>
                     {message}
-                </div>
+                </LogMessage>
             ))}
-        </div>
+        </LogContainer>
     );
 }
