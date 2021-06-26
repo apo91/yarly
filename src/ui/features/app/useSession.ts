@@ -2,8 +2,9 @@ import { useAtom } from "jotai";
 import { useCallback, useEffect, useState } from "react";
 import { Session } from "../../../game/Session";
 import { writeGameLogAtom } from "../gamelog/atoms";
+import { inventoryAtom } from "../inventory/atoms";
 // import { playerInfoAtom } from "../playerinfo/atoms";
-import { viewportHtmlAtom, turnCounterAtom, tileInfoAtom, inventoryAtom } from "./atoms";
+import { viewportHtmlAtom, turnCounterAtom, tileInfoAtom } from "./atoms";
 
 export const useSession = () => {
     const [, setViewportHtml] = useAtom(viewportHtmlAtom);

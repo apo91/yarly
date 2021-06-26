@@ -8,7 +8,7 @@ export const StatusbarContainer = styled.div`
     width: 300px;
     height: 24px;
     background-color: ${props => props.fillColor};
-    border: 2px solid white;
+    border: 0px solid white;
     /* border-radius: 8px; */
     overflow: hidden;
 `;

@@ -1,9 +1,11 @@
 import './App.css';
 import { useAtom } from "jotai";
-import { viewportHtmlAtom, turnCounterAtom, tileInfoAtom, inventoryAtom } from "./atoms";
+import { viewportHtmlAtom, turnCounterAtom, tileInfoAtom } from "./atoms";
 import { useSession } from './useSession';
 import { GameLog } from '../gamelog/GameLog';
 import { PlayerInfo } from '../playerinfo/PlayerInfo';
+import { PlayerInfoWrapper, UpperComponentsRow } from './App.styled';
+import { Inventory } from '../inventory/Inventory';
 
 const TurnCounter = (props) =>
   <div style={{
@@ -23,39 +25,25 @@ const TileInfo = (props) =>
     {props.children}
   </div>;
 
-const Inventory = (props) =>
-  <div style={{
-    position: "fixed",
-    top: "100px",
-    right: "20px",
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "flex-start",
-  }}>
-    <b>Inventory</b>
-    {props.children}
-  </div>
-
 function App() {
   useSession();
   const [viewportHtml] = useAtom(viewportHtmlAtom);
   const [turnCounter] = useAtom(turnCounterAtom);
   const [tileInfo] = useAtom(tileInfoAtom);
-  const [inventory] = useAtom(inventoryAtom);
   return (
     <div className="App">
-      <div style={{ position: "fixed", width: "320px", height: "140px", top: "20px" }}>
-        <PlayerInfo />
-      </div>
+      <UpperComponentsRow>
+        <PlayerInfoWrapper>
+          <PlayerInfo />
+        </PlayerInfoWrapper>
+      </UpperComponentsRow>
       <TurnCounter>
         {turnCounter}
       </TurnCounter>
       <TileInfo>
         {tileInfo}
       </TileInfo>
-      <Inventory>
-        {inventory.map(itemName => <div key={itemName}>{itemName}</div>)}
-      </Inventory>
+      <Inventory />
       <div style={{ width: "1024px" }}>
         {viewportHtml}
       </div>

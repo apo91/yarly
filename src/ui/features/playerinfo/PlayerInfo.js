@@ -1,15 +1,18 @@
 import { useAtom } from "jotai";
 import { Statusbar } from "../generic/Statusbar";
 import { playerInfoAtom } from "./atoms";
-import { PlayerInfoContainer, PlayerInfoRow, StatusbarLabel } from "./PlayerInfo.styled";
+import { PlayerInfoContainer, PlayerInfoRow, StatusbarLabel, PlayerInfoTitle } from "./PlayerInfo.styled";
 
 export const PlayerInfo = (props) => {
     const [playerInfo] = useAtom(playerInfoAtom);
     return (
         <PlayerInfoContainer {...props}>
+            <PlayerInfoTitle>
+                {playerInfo.name} lvl {playerInfo.level} {playerInfo.race} {playerInfo.class}
+            </PlayerInfoTitle>
             <PlayerInfoRow>
                 <StatusbarLabel>
-                    Health
+                    HP
                 </StatusbarLabel>
                 <Statusbar
                     primaryColor="red"
@@ -20,7 +23,7 @@ export const PlayerInfo = (props) => {
             </PlayerInfoRow>
             <PlayerInfoRow>
                 <StatusbarLabel>
-                    Mana
+                    MP
                 </StatusbarLabel>
                 <Statusbar
                     primaryColor="blue"
